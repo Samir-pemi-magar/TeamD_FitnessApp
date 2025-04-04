@@ -1,3 +1,4 @@
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:flutter/material.dart';
 
 class UserLogin extends StatelessWidget {
@@ -72,7 +73,11 @@ class UserLogin extends StatelessWidget {
                 // Log In Button
                 ElevatedButton(
                   onPressed: () {
-                    // Add login functionality here
+                    // Navigate to Packages screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Packages()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     padding:
@@ -90,8 +95,7 @@ class UserLogin extends StatelessWidget {
       ),
     );
   }
-}
-
+  
   Widget _buildTextField(String hintText, {bool obscureText = false}) {
     return TextField(
       obscureText: obscureText,
@@ -106,3 +110,4 @@ class UserLogin extends StatelessWidget {
       ),
     );
   }
+}

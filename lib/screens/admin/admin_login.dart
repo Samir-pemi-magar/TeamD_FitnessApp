@@ -1,15 +1,58 @@
+import 'package:fitnessapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-class AdminLogin extends StatelessWidget {
+class AdminLogin extends StatefulWidget {
   const AdminLogin({Key? key}) : super(key: key);
+
+  @override
+  _AdminLoginState createState() => _AdminLoginState();
+}
+
+class _AdminLoginState extends State<AdminLogin> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+
+  void _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = await _authService.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (user != null) {
+        // Navigate to dashboard
+        Navigator.pushReplacementNamed(context, '/admin_dashboard');
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please check your credentials.')),
+        );
+      }
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/background.png'), // Background image
+            image: AssetImage('assets/images/background.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -29,7 +72,6 @@ class AdminLogin extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
                 // Circular Logo
                 CircleAvatar(
                   radius: 50,
@@ -39,7 +81,7 @@ class AdminLogin extends StatelessWidget {
                 const SizedBox(height: 20),
                 // Welcome Text
                 const Text(
-                  'WELCOME BACK!',
+                  'Welcome Back!',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -47,61 +89,52 @@ class AdminLogin extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+
                 // Input Fields
-                 _buildTextField('Enter name...'),
-                const SizedBox(height: 10),
-                _buildTextField('Enter email...'),
-                const SizedBox(height: 10),
-                _buildTextField('Enter password...', obscureText: true),
-                const SizedBox(height: 10),
-                // Forgot Password Link
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Add Forgot Password functionality here
-                    },
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter email...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
                   ),
                 ),
+                const SizedBox(height: 10),
+
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter password...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
                 const SizedBox(height: 20),
-                // Log In Button
+
+                // Login Button
                 ElevatedButton(
-                  onPressed: () {
-                    // Add login functionality here
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape:
-                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: const Color.fromARGB(255, 128, 202, 138),
-                  ),
-                  child: const Text('Log In'),
+                  onPressed: _isLoading ? null : _login,
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Log In'),
                 ),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to forgot password screen
+                  },
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String hintText, {bool obscureText = false}) {
-    return TextField(
-      obscureText: obscureText,
-      style: const TextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.grey),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
         ),
       ),
     );

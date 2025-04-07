@@ -1,3 +1,4 @@
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -113,10 +114,21 @@ class _UserLoginState extends State<UserLogin> {
                 const SizedBox(height: 20),
                 // Login Button
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Log In'),
+                  onPressed: () {
+                    // Navigate to Packages screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Packages()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape:
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: const Color.fromARGB(255, 128, 202, 138),
+                  ),
+                  child: const Text('Log In'),
                 ),
               ],
             ),
@@ -125,4 +137,5 @@ class _UserLoginState extends State<UserLogin> {
       ),
     );
   }
+  
 }

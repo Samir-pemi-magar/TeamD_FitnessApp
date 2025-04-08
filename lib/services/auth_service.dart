@@ -5,6 +5,30 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Check if email already exists in Firebase Authentication and Firestore
+  Future<bool> checkIfEmailExists(String email) async {
+    try {
+      // Check Firebase Authentication
+      var methods = await _auth.fetchSignInMethodsForEmail(email);
+      if (methods.isNotEmpty) {
+        // Email exists in Firebase Authentication
+        return true;
+      }
+
+      // Check Firestore
+      var snapshot = await _firestore.collection('users').where('email', isEqualTo: email).get();
+      if (snapshot.docs.isNotEmpty) {
+        // Email exists in Firestore
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      print("Error checking if email exists: $e");
+      return false;
+    }
+  }
+
   // Sign up with email and password
   Future<User?> signUpWithEmailAndPassword({
     required String name,
@@ -13,7 +37,14 @@ class AuthService {
     required String phoneNumber,
   }) async {
     try {
-      print('Checking if user is the first user...');
+      // Check if email is already in use
+      bool emailExists = await checkIfEmailExists(email);
+      if (emailExists) {
+        print('Error: The email address is already in use.');
+        return null;  // Email is already in use
+      }
+
+      // Check if this is the first user for assigning role
       QuerySnapshot users = await _firestore.collection('users').get();
       String role = users.docs.isEmpty ? 'admin' : 'user';
 
@@ -78,7 +109,7 @@ class AuthService {
       return null;
     }
   }
-
+ 
   // Sign out
   Future<void> signOut() async {
     try {

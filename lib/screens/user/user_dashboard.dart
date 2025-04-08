@@ -1,5 +1,5 @@
-import 'package:fitnessapp/screens/user/packages_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
 
 class UserDashboard extends StatelessWidget {
   @override
@@ -21,6 +21,20 @@ class UserDashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Back Button
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Or use this if you want to go to a named Welcome screen:
+                        // Navigator.pushReplacementNamed(context, '/welcome');
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
                   // Logo and Title
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -175,7 +189,7 @@ class UserDashboard extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PackagesScreen()),
+                MaterialPageRoute(builder: (context) => Packages()),
               );
             },
           ),

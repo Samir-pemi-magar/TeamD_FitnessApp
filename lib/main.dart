@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'screens/user/user_dashboard.dart';
 import 'screens/user/user_login.dart';
 import 'screens/user/user_signup.dart';
-import 'screens/user/packages_screen.dart';
+import 'screens/user/Packages/packages.dart';
 import 'screens/common/welcome_screen.dart';
 import 'firebase_options.dart';
 
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const UserLogin(),
         '/signup': (context) => const UserSignup(),
         '/user_dashboard': (context) => UserDashboard(),
-        '/packages': (context) => PackagesScreen(),
+        '/packages': (context) => Packages(),
       },
     );
   }

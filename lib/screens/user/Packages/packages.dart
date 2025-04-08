@@ -10,7 +10,7 @@ class Packages extends StatefulWidget {
 }
 
 class _PackagesState extends State<Packages> {
-    String Selectedpackage = "";
+    String? Selectedpackage = "";
     List<Map<String, dynamic>> FetchedPackages = [];
      void initState() {
       super.initState();
@@ -41,7 +41,7 @@ class _PackagesState extends State<Packages> {
             child: InkWell(
                 onTap: (){setState(() {
                   Selectedpackage = FetchedPackages[index]["title"];
-                  FirebaseFirestore.instance.collection('packages').doc('selectedpackage').set({
+                  FirebaseFirestore.instance.collection('selectedPackage').doc('selected').set({
                     'selectedpackage' : Selectedpackage,
                   }, SetOptions(merge: true));
 

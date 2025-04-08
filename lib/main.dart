@@ -1,4 +1,5 @@
 import 'package:fitnessapp/firebase_options.dart';
+import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 //import 'package:fitnessapp/screens/user/Packages/package_store.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ZenFit',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: WelcomeScreen(),
+      home: WaterIntake(),
     );
   }
 }

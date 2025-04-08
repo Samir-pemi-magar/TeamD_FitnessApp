@@ -13,45 +13,50 @@ class WelcomeScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/background.png'), 
+            image: AssetImage('assets/images/background.png'),
             fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SizedBox(height: 20),
-              // Circular Logo
-              Image.asset(
-                'assets/images/logo.png',
-                height: 80,
-              ),
-              const SizedBox(height: 20),
-              // App Name
-              const Text(
-                'ZenFit',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 50),
-              // Log In Button
-              _buildButton(context, 'Log In', const UserLogin()),
-              const SizedBox(height: 15),
-              // Sign Up Button
-              _buildButton(context, 'Sign Up', const UserSignup()),
-              const SizedBox(height: 30),
-              // Role Buttons (Admin, Trainer)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              const SizedBox(height: 60),
+              // Logo and App Title
+              Column(
                 children: [
-                  _buildSmallButton(context, 'Admin', const AdminLogin()),
-                  const SizedBox(width: 10),
-                  _buildSmallButton(context, 'Trainer', const TrainerLogin()),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'zenfit',
+                    style: TextStyle(
+                      fontSize: 52,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
+              ),
+              
+              // Login/Signup buttons
+              Column(
+                children: [
+                  _buildButton(context, 'Log In', const UserLogin()),
+                  const SizedBox(height: 15),
+                  _buildButton(context, 'Sign Up', const UserSignup()),
+                ],
+              ),
+              
+              // Admin/Trainer buttons
+              Padding(
+                padding: const EdgeInsets.only(bottom: 40.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSmallButton(context, 'Admin', const AdminLogin()),
+                    const SizedBox(width: 20),
+                    _buildSmallButton(context, 'Trainer', const TrainerLogin()),
+                  ],
+                ),
               ),
             ],
           ),
@@ -60,7 +65,7 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  // Large Button (Log In / Sign Up)
+  // Main buttons (Log In / Sign Up)
   Widget _buildButton(BuildContext context, String text, Widget page) {
     return SizedBox(
       width: 200,
@@ -72,21 +77,21 @@ class WelcomeScreen extends StatelessWidget {
           );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade300,
+          backgroundColor: Colors.white.withOpacity(0.8),
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
           ),
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 18, color: Colors.white),
+          style: TextStyle(fontSize: 18, color: Colors.green.shade700),
         ),
       ),
     );
   }
 
-  // Small Button (Admin / Trainer)
+  // Small buttons (Admin / Trainer)
   Widget _buildSmallButton(BuildContext context, String text, Widget page) {
     return ElevatedButton(
       onPressed: () {
@@ -96,15 +101,15 @@ class WelcomeScreen extends StatelessWidget {
         );
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 80, 162, 82),
+        backgroundColor: Colors.white.withOpacity(0.8),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
+        style: TextStyle(fontSize: 16, color: Colors.green.shade700),
       ),
     );
   }

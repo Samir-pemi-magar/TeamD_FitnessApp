@@ -1,16 +1,59 @@
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-class UserLogin extends StatelessWidget {
+class UserLogin extends StatefulWidget {
   const UserLogin({Key? key}) : super(key: key);
+
+  @override
+  _UserLoginState createState() => _UserLoginState();
+}
+
+class _UserLoginState extends State<UserLogin> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+
+  void _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = await _authService.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (user != null) {
+        // Navigate to dashboard
+        Navigator.pushReplacementNamed(context, '/user_dashboard');
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please check your credentials.')),
+        );
+      }
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/background.png'), // Background image
+            image: AssetImage('assets/images/background.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -18,7 +61,7 @@ class UserLogin extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start, // Align items to the top
               children: [
                 // Back Button
                 Align(
@@ -26,7 +69,7 @@ class UserLogin extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () {
-                      Navigator.pop(context); // Navigate back to the previous screen
+                      Navigator.pop(context);
                     },
                   ),
                 ),
@@ -39,7 +82,7 @@ class UserLogin extends StatelessWidget {
                 const SizedBox(height: 20),
                 // Welcome Text
                 const Text(
-                  'WELCOME BACK!',
+                  'Welcome Back!',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -48,29 +91,28 @@ class UserLogin extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 // Input Fields
-                _buildTextField('Enter name...'),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter email...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
                 const SizedBox(height: 10),
-                _buildTextField('Enter email...'),
-                const SizedBox(height: 10),
-                _buildTextField('Enter password...', obscureText: true),
-                const SizedBox(height: 10),
-                _buildTextField('Enter number...'),
-                const SizedBox(height: 20),
-                // Forgot Password Link
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Add Forgot Password functionality here
-                    },
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter password...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Log In Button
+                // Login Button
                 ElevatedButton(
                   onPressed: () {
                     // Navigate to Packages screen
@@ -96,18 +138,4 @@ class UserLogin extends StatelessWidget {
     );
   }
   
-  Widget _buildTextField(String hintText, {bool obscureText = false}) {
-    return TextField(
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
 }

@@ -1,4 +1,5 @@
 import 'package:fitnessapp/screens/user/Packages/ConfirmationPayment.dart';
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:flutter/material.dart';
 
 class SubPackage extends StatefulWidget {
@@ -45,7 +46,16 @@ class _SubPackageState extends State<SubPackage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Payment")),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Packages()));
+          },
+        ),
+        title: const Text("Payment"),
+        backgroundColor: Colors.green,
+      ),
       body: Center( // Center everything horizontally
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start, // Center everything vertically
@@ -77,13 +87,18 @@ class _SubPackageState extends State<SubPackage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Confirmationpayment(packageName: selectedPackage!, packagePrice: totalCost)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Confirmationpayment(
+                            packageName: selectedPackage!,
+                            packagePrice: totalCost)));
               },
               child: const Text("Proceed to Payment"),
             ),
           ],
         ),
       ),
-    ); 
+    );
   }
 }

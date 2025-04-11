@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -34,13 +35,23 @@ class _WaterIntakeState extends State<WaterIntake> {
 
   void _SaveIntake() {
     FirebaseFirestore.instance.collection('WaterIntakeDatabase').doc('WaterIntake').set({
-                    'waterintake' : waterIntake,
-                  }, SetOptions(merge: true));
+      'waterintake': waterIntake,
+    }, SetOptions(merge: true));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard()));
+          },
+        ),
+        title: Text('Water Intake'),
+        backgroundColor: Colors.green,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -142,7 +153,7 @@ class _WaterIntakeState extends State<WaterIntake> {
                   textStyle:
                       TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-              )
+              ),
             ],
           ),
         ),

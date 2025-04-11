@@ -1,200 +1,320 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class UserDashboard extends StatelessWidget {
+class UserDashboard extends StatefulWidget {
+  UserDashboard({super.key});
+
+  @override
+  _UserDashboardState createState() => _UserDashboardState();
+}
+
+class _UserDashboardState extends State<UserDashboard> {
+  double cal = 0;
+  List<dynamic> calories = [];
+  List<dynamic> weights = [];
+  TextEditingController _controller = TextEditingController();
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    getCaloriesData();
+    getWeightsData();
+  }
+
+  void _createCaloriesData() async {
+    await FirebaseFirestore.instance
+        .collection('CaloriesDataset')
+        .doc('Calories')
+        .set({'Calories': cal}, SetOptions(merge: true));
+
+    getCaloriesData();
+  }
+
+  void _createWeightData() async {
+    await FirebaseFirestore.instance.collection('WeightDataset').add({
+      'Weight': cal,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    getWeightsData();
+  }
+
+  void getCaloriesData() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('CaloriesDataset').get();
+      setState(() {
+        calories = snapshot.docs.map((doc) => doc.data()).toList();
+      });
+    } catch (e) {
+      print("Error fetching calories data: $e");
+    }
+  }
+
+  void getWeightsData() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('WeightDataset').get();
+      setState(() {
+        weights = snapshot.docs.map((doc) => doc.data()).toList();
+      });
+    } catch (e) {
+      print("Error fetching weights data: $e");
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        // Navigate to UserDashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
+        break;
+      case 1:
+        // Navigate to WaterIntake
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WaterIntake()),
+        );
+        break;
+      case 2:
+        // Navigate to Packages
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Packages()),  // Replace with actual class
+        );
+        break;
+      case 3:
+        // Profile navigation placeholder
+        print("Profile screen not made yet");
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Image
-          Image.asset(
-            'assets/images/background.png',
-            fit: BoxFit.cover,
-            height: double.infinity,
-            width: double.infinity,
-          ),
-          // Content
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Back Button
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        // Or use this if you want to go to a named Welcome screen:
-                        // Navigator.pushReplacementNamed(context, '/welcome');
-                      },
-                    ),
+      backgroundColor: Color.fromARGB(255, 106, 165, 43),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 40),
+                Text(
+                  "ZenFit",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
-                  const SizedBox(height: 10),
-
-                  // Logo and Title
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(width: 10),
-                      Text(
-                        'ZenFit',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                ),
+                SizedBox(height: 20),
+                Container(
+                  width: 300,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF7E9AE),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Calories Aim
-                  Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.yellow[100],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Calories aim:', style: TextStyle(fontSize: 18)),
-                        Row(
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("Calories aim:"),
+                              Text(
+                                calories.isNotEmpty
+                                    ? (calories.first['Calories']?.toString() ?? "0") + " cal"
+                                    : "Loading... cal",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('2000 cal', style: TextStyle(fontSize: 18)),
-                            Icon(Icons.favorite, color: Colors.red),
+                            Icon(
+                              FontAwesomeIcons.heartbeat,
+                              size: 24,
+                              color: Colors.red,
+                            ),
+                            Icon(
+                              FontAwesomeIcons.lungs,
+                              size: 24,
+                              color: Colors.blue,
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Weight Record
-                  Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.yellow[100],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  width: 300,
+                  height: 190,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF7E9AE),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('Weight record', style: TextStyle(fontSize: 18)),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            hintText: 'Enter your weight...',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
+                        Text("Weight Record: "),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: _controller,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Enter your weight',
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 30),
                         ElevatedButton(
                           onPressed: () {
-                            // Save weight record logic
+                            setState(() {
+                              cal = double.tryParse(_controller.text) ?? 0;
+                              _createWeightData();
+                              _controller.clear();
+                            });
                           },
                           child: Text('Save Weight'),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Circular Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildCircularButton(
-                        'Water intake',
-                        Icons.opacity,
-                        () {},
+                ),
+                SizedBox(height: 60),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => WaterIntake()));
+                      },
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF7E9AE),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Water Intake",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
-                      _buildCircularButton('Fitness goal', Icons.flag, () {}),
-                      _buildCircularButton(
-                        'Weight record',
-                        Icons.assessment,
-                        () {},
+                    ),
+                    SizedBox(width: 100),
+                    GestureDetector(
+                      onTap: () {
+                        print("Fitness Goal tapped!");
+                      },
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF7E9AE),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Fitness Goal",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        print("Weight Record tapped!");
+                      },
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF7E9AE),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Weight Record",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-
-          // Bottom Navigation Bar
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _buildBottomNavigationBar(context),
-          ),
-        ],
+        ),
       ),
-    );
-  }
-
-  // Helper function to build circular buttons
-  Widget _buildCircularButton(
-    String title,
-    IconData icon,
-    VoidCallback onPressed,
-  ) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            shape: CircleBorder(),
-            padding: EdgeInsets.all(20),
-            backgroundColor: Colors.white,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.house),
+            label: 'Home',
           ),
-          child: Icon(icon, size: 30, color: Colors.blue),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          title,
-          style: TextStyle(color: Colors.white),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  // Helper function to build bottom navigation bar
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 65,
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          IconButton(
-            icon: Icon(Icons.home),
-            onPressed: () {
-              // Navigate to UserDashboard (already the current page)
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => UserDashboard()),
-              );
-            },
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.droplet),
+            label: 'Water Intake',
           ),
-          IconButton(icon: Icon(Icons.local_drink), onPressed: () {}),
-          IconButton(
-            icon: Icon(Icons.inventory),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Packages()),
-              );
-            },
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.box),
+            label: 'Packages',
           ),
-          IconButton(icon: Icon(Icons.person), onPressed: () {}),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.user),
+            label: 'Profile',
+          ),
         ],
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.black,
       ),
     );
   }

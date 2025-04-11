@@ -1,4 +1,3 @@
-
 import 'package:fitnessapp/screens/user/Packages/PaymentStatement.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +15,16 @@ class _ConfirmationpaymentState extends State<Confirmationpayment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);  // This will navigate back to the previous screen
+          },
+        ),
+        title: Text("Confirm Payment"),
+        backgroundColor: Colors.green,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -25,7 +34,7 @@ class _ConfirmationpaymentState extends State<Confirmationpayment> {
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,//.withOpacity(0.8),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(

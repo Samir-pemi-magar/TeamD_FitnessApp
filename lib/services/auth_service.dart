@@ -5,30 +5,72 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Sign up with email and password
-  Future<User?> signUpWithEmailAndPassword({
+  /// Check if email already exists in Firebase Auth or Firestore
+  Future<bool> checkIfEmailExists(String email) async {
+    try {
+      var methods = await _auth.fetchSignInMethodsForEmail(email);
+      if (methods.isNotEmpty) return true;
+
+      var snapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+      return snapshot.docs.isNotEmpty;
+    } catch (e) {
+      print("Error checking email: $e");
+      return false;
+    }
+  }
+
+  /// Sign up a user with role (admin, trainer, user)
+  Future<Map<String, dynamic>?> signUpWithEmailAndPassword({
     required String name,
     required String email,
     required String password,
     required String phoneNumber,
+    String? requestedRole,
   }) async {
     try {
-      print('Checking if user is the first user...');
-      QuerySnapshot users = await _firestore.collection('users').get();
-      String role = users.docs.isEmpty ? 'admin' : 'user';
+      // Email already in use?
+      if (await checkIfEmailExists(email)) {
+        print('Email already in use.');
+        return null;
+      }
 
-      print('Creating user with email: $email');
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      // Determine role
+      String role;
+      final existingUsers = await _firestore.collection('users').get();
+
+      if (requestedRole == 'admin') {
+        final adminCheck = await _firestore
+            .collection('users')
+            .where('role', isEqualTo: 'admin')
+            .get();
+
+        if (adminCheck.docs.isNotEmpty) {
+          throw Exception('An admin already exists.');
+        }
+        role = 'admin';
+      } else if (requestedRole != null) {
+        role = requestedRole;
+      } else {
+        role = existingUsers.docs.isEmpty ? 'admin' : 'user';
+      }
+
+      print('Creating $role account for $email');
+
+      // Create user in Firebase Auth
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (userCredential.user == null) {
-        throw Exception('User creation failed: user is null.');
-      }
+      final user = userCredential.user;
+      if (user == null) throw Exception('User creation failed.');
 
-      print('Saving user data to Firestore...');
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+      // Save user data in Firestore
+      await _firestore.collection('users').doc(user.uid).set({
+        'uid': user.uid,
         'name': name,
         'email': email,
         'phoneNumber': phoneNumber,
@@ -36,57 +78,65 @@ class AuthService {
         'role': role,
       });
 
-      print('Signup successful!');
-      return userCredential.user;
+      return {
+        'uid': user.uid,
+        'email': email,
+        'role': role,
+        'name': name,
+      };
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        print('Error: The email address is already in use by another account.');
-      } else {
-        print('FirebaseAuthException: ${e.code} - ${e.message ?? 'No message available'}');
-      }
+      print('FirebaseAuthException: ${e.code} - ${e.message}');
       return null;
     } catch (e) {
-      print('Error signing up: $e');
+      print('Signup error: $e');
       return null;
     }
   }
 
-  // Sign in with email and password
-  Future<User?> signInWithEmailAndPassword({
+  /// Sign in with email and password, return user profile
+  Future<Map<String, dynamic>?> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      print('Signing in with email: $email');
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      print('Signing in: $email');
+
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print('Sign-in successful!');
-      return userCredential.user;
+
+      final uid = userCredential.user?.uid;
+      if (uid == null) throw Exception("User UID is null.");
+
+      final userDoc = await _firestore.collection('users').doc(uid).get();
+      if (!userDoc.exists) throw Exception("User profile not found in Firestore.");
+
+      final data = userDoc.data()!;
+      print("Signed in as ${data['role']}");
+
+      return {
+        'uid': uid,
+        'email': email,
+        'role': data['role'],
+        'name': data['name'],
+      };
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('Error: No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Error: Wrong password provided for that user.');
-      } else {
-        print('FirebaseAuthException: ${e.code} - ${e.message ?? 'No message available'}');
-      }
+      print('FirebaseAuthException: ${e.code} - ${e.message}');
       return null;
     } catch (e) {
-      print('Error signing in: $e');
+      print('Sign-in error: $e');
       return null;
     }
   }
 
-  // Sign out
+  /// Sign out current user
   Future<void> signOut() async {
     try {
-      print('Signing out...');
       await _auth.signOut();
-      print('Sign-out successful!');
+      print('Signed out successfully.');
     } catch (e) {
-      print('Error signing out: $e');
+      print('Sign-out error: $e');
     }
   }
 }

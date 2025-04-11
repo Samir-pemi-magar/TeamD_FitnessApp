@@ -1,6 +1,7 @@
-import 'package:fitnessapp/screens/user/Packages/packages.dart';
-import 'package:fitnessapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fitnessapp/services/auth_service.dart';
+import 'package:fitnessapp/screens/user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_signup.dart'; // Make sure this path is correct
 
 class UserLogin extends StatefulWidget {
   const UserLogin({Key? key}) : super(key: key);
@@ -28,15 +29,16 @@ class _UserLoginState extends State<UserLogin> {
 
       if (user != null) {
         // Navigate to dashboard
-        Navigator.pushReplacementNamed(context, '/user_dashboard');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
       } else {
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login failed. Please check your credentials.')),
         );
       }
     } catch (e) {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
@@ -61,7 +63,7 @@ class _UserLoginState extends State<UserLogin> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start, // Align items to the top
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Back Button
                 Align(
@@ -73,14 +75,13 @@ class _UserLoginState extends State<UserLogin> {
                     },
                   ),
                 ),
-                // Circular Logo
+                // Logo
                 CircleAvatar(
                   radius: 50,
                   backgroundImage: AssetImage('assets/images/logo.png'),
                   backgroundColor: Colors.transparent,
                 ),
                 const SizedBox(height: 20),
-                // Welcome Text
                 const Text(
                   'Welcome Back!',
                   style: TextStyle(
@@ -90,7 +91,7 @@ class _UserLoginState extends State<UserLogin> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Input Fields
+                // Email Field
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -101,6 +102,7 @@ class _UserLoginState extends State<UserLogin> {
                   ),
                 ),
                 const SizedBox(height: 10),
+                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -112,23 +114,33 @@ class _UserLoginState extends State<UserLogin> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Login Button
-                ElevatedButton(
+                // Login Button or Loader
+                _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          backgroundColor: const Color.fromARGB(255, 128, 202, 138),
+                        ),
+                        child: const Text('Log In'),
+                      ),
+                const SizedBox(height: 15),
+                // Redirect to Signup
+                TextButton(
                   onPressed: () {
-                    // Navigate to Packages screen
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Packages()),
+                      MaterialPageRoute(builder: (context) => UserSignup()),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape:
-                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: const Color.fromARGB(255, 128, 202, 138),
+                  child: const Text(
+                    "Don't have an account? Sign Up",
+                    style: TextStyle(color: Colors.white, decoration: TextDecoration.underline),
                   ),
-                  child: const Text('Log In'),
                 ),
               ],
             ),
@@ -137,5 +149,4 @@ class _UserLoginState extends State<UserLogin> {
       ),
     );
   }
-  
 }

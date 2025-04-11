@@ -1,5 +1,5 @@
-import 'package:fitnessapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fitnessapp/services/auth_service.dart';
 
 class AdminLogin extends StatefulWidget {
   const AdminLogin({Key? key}) : super(key: key);
@@ -20,22 +20,19 @@ class _AdminLoginState extends State<AdminLogin> {
     });
 
     try {
-      final user = await _authService.signInWithEmailAndPassword(
+      final result = await _authService.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      if (user != null) {
-        // Navigate to dashboard
+      if (result != null && result['role'] == 'admin') {
         Navigator.pushReplacementNamed(context, '/admin_dashboard');
       } else {
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login failed. Please check your credentials.')),
+          const SnackBar(content: Text('Access denied. Not an admin account.')),
         );
       }
     } catch (e) {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
@@ -49,6 +46,7 @@ class _AdminLoginState extends State<AdminLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -57,83 +55,87 @@ class _AdminLoginState extends State<AdminLogin> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Back Button
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back, color: Colors.white),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: AssetImage('assets/images/logo.png'),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Admin Login',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter email...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter password...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: _isLoading ? null : _login,
+                            child: _isLoading
+                                ? const CircularProgressIndicator()
+                                : const Text('Log In'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // TODO: Implement forgot password if needed
+                            },
+                            child: const Text(
+                              "Forgot Password?",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          const Spacer(),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                // Circular Logo
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: AssetImage('assets/images/logo.png'),
-                  backgroundColor: Colors.transparent,
-                ),
-                const SizedBox(height: 20),
-                // Welcome Text
-                const Text(
-                  'Welcome Back!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Input Fields
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter email...',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter password...',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Login Button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Log In'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to forgot password screen
-                  },
-                  child: const Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

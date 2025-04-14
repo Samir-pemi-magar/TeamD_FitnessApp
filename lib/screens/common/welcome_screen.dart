@@ -54,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                   children: [
                     _buildSmallButton(context, 'Admin', const AdminLogin()),
                     const SizedBox(width: 20),
-                    _buildSmallButton(context, 'Trainer', const TrainerLogin()),
+                    _buildSmallButton(context, 'Trainer', TrainerLogin()),
                   ],
                 ),
               ),

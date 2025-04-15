@@ -23,8 +23,8 @@ class _SubPackageState extends State<SubPackage> {
       "price": 12000,
     },
     {
-      "title": "Overall Fitness Package (1 month)",
-      "price": 3200,
+      "title": "Muscle Build Package (1 month)",
+      "price": 4999,
     },
     {
       "title": "Muscle Build Package (3 month)",

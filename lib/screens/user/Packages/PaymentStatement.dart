@@ -1,10 +1,16 @@
+import 'package:fitnessapp/screens/user/select_package.dart';
 import 'package:flutter/material.dart';
+import 'package:fitnessapp/screens/user/user_info.dart'; // Import the UserInfoScreen
 
 class PaymentStatement extends StatefulWidget {
   final String packageName;
   final double packagePrice;
 
-  const PaymentStatement({super.key, required this.packageName, required this.packagePrice});
+  const PaymentStatement({
+    super.key,
+    required this.packageName,
+    required this.packagePrice,
+  });
 
   @override
   _PaymentStatementState createState() => _PaymentStatementState();
@@ -27,19 +33,34 @@ class _PaymentStatementState extends State<PaymentStatement> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Payment Statement", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                "Payment Statement",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 10),
-              Text("Selected Package: ${widget.packageName}", style: TextStyle(fontSize: 16)),
-              Text("Total Cost: \$${widget.packagePrice.toStringAsFixed(2)}", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                "Selected Package: ${widget.packageName}",
+                style: TextStyle(fontSize: 16),
+              ),
+              Text(
+                "Total Cost: \$${widget.packagePrice.toStringAsFixed(2)}",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 10),
-              Text("Current Time: $currentTime", style: TextStyle(fontSize: 16)),
+              Text(
+                "Current Time: $currentTime",
+                style: TextStyle(fontSize: 16),
+              ),
               SizedBox(height: 20),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Go back to the previous page
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => SelectPackageScreen()),
+                  );
                 },
-                child: Text("Done"),
+                child: Text("Continue"),
               ),
             ],
           ),

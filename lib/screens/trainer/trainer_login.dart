@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'trainer_dashboard.dart'; 
+
 
 class TrainerLogin extends StatefulWidget {
   TrainerLogin({super.key});
@@ -43,26 +45,35 @@ Future<void> _loginTrainer() async {
   }
 
   try {
-    // Fetch users from Firestore
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').get();
 
-    // Loop through users to find a match
     bool isValidTrainer = false;
     for (var doc in snapshot.docs) {
       var userData = doc.data() as Map<String, dynamic>;
       if (userData['email'] == email && userData['password'] == password && userData['role'] == 'trainer') {
         isValidTrainer = true;
-        break; // Exit loop if match found
+        break;
       }
     }
 
     if (isValidTrainer) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Trainer login successful!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Trainer login successful!")),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const TrainerDashboard()),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Invalid credentials or not a trainer.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Invalid credentials or not a trainer.")),
+      );
     }
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: $e")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Login failed: $e")),
+    );
   }
 }
 

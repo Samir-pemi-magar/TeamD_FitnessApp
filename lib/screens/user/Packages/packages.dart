@@ -14,6 +14,7 @@ class _PackagesState extends State<Packages> {
   String? Selectedpackage = "";
   List<Map<String, dynamic>> FetchedPackages = [];
 
+  @override
   void initState() {
     super.initState();
     getPackages();  // Call the function to fetch data
@@ -26,7 +27,7 @@ class _PackagesState extends State<Packages> {
         FetchedPackages = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
       });
     } catch (e) {
-      print("error fetching information");
+      print("error fetching information: $e");
     }
   }
 
@@ -42,28 +43,43 @@ class _PackagesState extends State<Packages> {
           },
         ),
       ),
-      body: ListView.builder(
-        itemCount: FetchedPackages.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.all(10),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  Selectedpackage = FetchedPackages[index]["title"];
-                  FirebaseFirestore.instance.collection('selectedPackage').doc('selected').set({
-                    'selectedpackage': Selectedpackage,
-                  }, SetOptions(merge: true));
-                });
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SubPackage()));
-              },
-              child: ListTile(
-                title: Text(FetchedPackages[index]["title"], style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(FetchedPackages[index]["description"]),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/background.png'),
+                fit: BoxFit.cover,
               ),
             ),
-          );
-        },
+          ),
+          ListView.builder(
+            itemCount: FetchedPackages.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: EdgeInsets.all(10),
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      Selectedpackage = FetchedPackages[index]["title"];
+                    });
+                    FirebaseFirestore.instance.collection('selectedPackage').doc('selected').set({
+                      'selectedpackage': Selectedpackage,
+                    }, SetOptions(merge: true));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SubPackage()));
+                  },
+                  child: ListTile(
+                    title: Text(
+                      FetchedPackages[index]["title"],
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(FetchedPackages[index]["description"]),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

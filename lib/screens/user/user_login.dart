@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fitnessapp/services/auth_service.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
-import 'package:fitnessapp/screens/user/user_signup.dart'; // Make sure this path is correct
+import 'package:fitnessapp/screens/user/user_signup.dart'; 
 
 class UserLogin extends StatefulWidget {
   const UserLogin({Key? key}) : super(key: key);
@@ -28,7 +28,7 @@ class _UserLoginState extends State<UserLogin> {
       );
 
       if (user != null) {
-        // Navigate to dashboard
+        // Navigates to dashboard
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserDashboard()),

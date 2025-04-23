@@ -37,28 +37,24 @@ class _UserSignupState extends State<UserSignup> {
     try {
       final usersRef = FirebaseFirestore.instance.collection('users');
 
-      // Check if email is already in use
       final emailSnapshot = await usersRef.where('email', isEqualTo: email).get();
       if (emailSnapshot.docs.isNotEmpty) {
         _showError("Email is already in use.");
         return;
       }
 
-      // Check if name is already in use
       final nameSnapshot = await usersRef.where('name', isEqualTo: name).get();
       if (nameSnapshot.docs.isNotEmpty) {
         _showError("Name is already taken.");
         return;
       }
 
-      // Check if phone number is already in use
       final phoneSnapshot = await usersRef.where('phoneNumber', isEqualTo: phone).get();
       if (phoneSnapshot.docs.isNotEmpty) {
         _showError("Phone number is already registered.");
         return;
       }
 
-      // Proceed with signup
       final user = await _authService.signUpWithEmailAndPassword(
         name: name,
         email: email,
@@ -83,6 +79,7 @@ class _UserSignupState extends State<UserSignup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -91,98 +88,103 @@ class _UserSignupState extends State<UserSignup> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // Back Button
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back, color: Colors.white),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: AssetImage('assets/images/logo.png'),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Welcome to ZenFit -\nwhere fitness meets balance',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter name...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter email...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter password...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: _phoneController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter number...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: _isLoading ? null : _signUp,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              backgroundColor: const Color.fromARGB(255, 128, 202, 138),
+                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : const Text('Create'),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
-                  // Circular Logo
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/images/logo.png'),
-                    backgroundColor: Colors.transparent,
-                  ),
-                  const SizedBox(height: 20),
-                  // Welcome Text
-                  const Text(
-                    'Welcome to ZenFit -\nwhere fitness meets balance',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Input Fields
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter name...',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter email...',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter password...',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter number...',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Create Button
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _signUp,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      backgroundColor: const Color.fromARGB(255, 128, 202, 138),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Create'),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),

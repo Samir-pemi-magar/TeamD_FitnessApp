@@ -134,7 +134,7 @@ class _UserDashboardState extends State<UserDashboard> {
                 Container(
                   width: 300,
                   height: 100,
-                  decoration: BoxDecoration(
+                  decoration: BoxDecoration(  
                     color: Color(0xFFF7E9AE),
                     borderRadius: BorderRadius.circular(12),
                   ),

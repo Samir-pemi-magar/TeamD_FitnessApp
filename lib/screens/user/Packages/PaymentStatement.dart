@@ -1,6 +1,5 @@
 import 'package:fitnessapp/screens/user/select_package.dart';
 import 'package:flutter/material.dart';
-import 'package:fitnessapp/screens/user/user_info.dart'; // Import the UserInfoScreen
 
 class PaymentStatement extends StatefulWidget {
   final String packageName;
@@ -22,49 +21,90 @@ class _PaymentStatementState extends State<PaymentStatement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Payment Statement")),
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
+      appBar: AppBar(
+        title: const Text("Payment Statement"),
+        backgroundColor: Colors.green,
+      ),
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/background.png'), // Your background image
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Payment Statement",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+
+          // Foreground Content
+          Center(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.symmetric(horizontal: 30),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Payment Statement",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Text(
+                      "Selected Package: ${widget.packageName}",
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Text(
+                      "Total Cost: NPR ${widget.packagePrice.toStringAsFixed(2)}",
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Text(
+                      "Transaction Time: $currentTime",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 30),
+
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        textStyle: const TextStyle(fontSize: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => SelectPackageScreen()),
+                        );
+                      },
+                      child: const Text("Continue"),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 10),
-              Text(
-                "Selected Package: ${widget.packageName}",
-                style: TextStyle(fontSize: 16),
-              ),
-              Text(
-                "Total Cost: \$${widget.packagePrice.toStringAsFixed(2)}",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text(
-                "Current Time: $currentTime",
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => SelectPackageScreen()),
-                  );
-                },
-                child: Text("Continue"),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

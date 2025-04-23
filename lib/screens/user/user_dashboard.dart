@@ -112,181 +112,188 @@ class _UserDashboardState extends State<UserDashboard> {
     );
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 106, 165, 43),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: 40),
-                Text(
-                  "ZenFit",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 40),
+                  Text(
+                    "ZenFit",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                SizedBox(height: 20),
-                Container(
-                  width: 300,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF7E9AE),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
+                  SizedBox(height: 20),
+                  Container(
+                    width: 300,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF7E9AE),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Calories aim:"),
+                                Text(
+                                  calories.isNotEmpty
+                                      ? (calories.first['Calories']?.toString() ?? "0") + " cal"
+                                      : "Loading... cal",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("Calories aim:"),
-                              Text(
-                                calories.isNotEmpty
-                                    ? (calories.first['Calories']?.toString() ?? "0") + " cal"
-                                    : "Loading... cal",
-                                style: TextStyle(fontSize: 16),
+                              Icon(
+                                FontAwesomeIcons.heartbeat,
+                                size: 24,
+                                color: Colors.red,
+                              ),
+                              Icon(
+                                FontAwesomeIcons.lungs,
+                                size: 24,
+                                color: Colors.blue,
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              FontAwesomeIcons.heartbeat,
-                              size: 24,
-                              color: Colors.red,
-                            ),
-                            Icon(
-                              FontAwesomeIcons.lungs,
-                              size: 24,
-                              color: Colors.blue,
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                Container(
-                  width: 300,
-                  height: 190,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF7E9AE),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text("Weight Record: "),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: _controller,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Enter your weight',
-                              border: OutlineInputBorder(),
+                  SizedBox(height: 20),
+                  Container(
+                    width: 300,
+                    height: 190,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF7E9AE),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text("Weight Record: "),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                              controller: _controller,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: 'Enter your weight',
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              cal = double.tryParse(_controller.text) ?? 0;
-                              _createWeightData();
-                              _controller.clear();
-                            });
-                          },
-                          child: Text('Save Weight'),
-                        ),
-                      ],
+                          SizedBox(height: 30),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                cal = double.tryParse(_controller.text) ?? 0;
+                                _createWeightData();
+                                _controller.clear();
+                              });
+                            },
+                            child: Text('Save Weight'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 60),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => WaterIntake()));
-                      },
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF7E9AE),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Water Intake",
-                            textAlign: TextAlign.center,
+                  SizedBox(height: 60),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => WaterIntake()));
+                        },
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF7E9AE),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Water Intake",
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 100),
-                    GestureDetector(
-                      onTap: () {
-                        print("Fitness Goal tapped!");
-                      },
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF7E9AE),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Fitness Goal",
-                            textAlign: TextAlign.center,
+                      SizedBox(width: 100),
+                      GestureDetector(
+                        onTap: () {
+                          print("Fitness Goal tapped!");
+                        },
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF7E9AE),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Fitness Goal",
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        print("Weight Record tapped!");
-                      },
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF7E9AE),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Weight Record",
-                            textAlign: TextAlign.center,
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          print("Weight Record tapped!");
+                        },
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF7E9AE),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Weight Record",
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -315,6 +322,7 @@ class _UserDashboardState extends State<UserDashboard> {
         ],
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
+        backgroundColor: Color(0xFFF7E9AE),  // This is the background color of the navigation bar
       ),
     );
   }

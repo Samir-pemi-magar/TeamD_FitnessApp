@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class WaterIntake extends StatefulWidget {
@@ -12,29 +10,27 @@ class WaterIntake extends StatefulWidget {
 
 class _WaterIntakeState extends State<WaterIntake> {
   int waterIntake = 0;
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
-  void _Twofiftey() {
+  void _addWater(int amount) {
     setState(() {
-      waterIntake += 250;
+      waterIntake += amount;
     });
   }
 
-  void _FiveHundred() {
-    setState(() {
-      waterIntake += 500;
-    });
-  }
-
-  void _Custom() {
-    setState(() {
-      waterIntake += int.tryParse(_controller.text) ?? 0;
+  void _customAdd() {
+    final customAmount = int.tryParse(_controller.text) ?? 0;
+    if (customAmount > 0) {
+      _addWater(customAmount);
       _controller.clear();
-    });
+    }
   }
 
-  void _SaveIntake() {
-    FirebaseFirestore.instance.collection('WaterIntakeDatabase').doc('WaterIntake').set({
+  void _saveIntake() {
+    FirebaseFirestore.instance
+        .collection('WaterIntakeDatabase')
+        .doc('WaterIntake')
+        .set({
       'waterintake': waterIntake,
     }, SetOptions(merge: true));
   }
@@ -46,116 +42,143 @@ class _WaterIntakeState extends State<WaterIntake> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard()));
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => UserDashboard()),
+            );
           },
         ),
-        title: Text('Water Intake'),
+        title: const Text('Water Intake'),
         backgroundColor: Colors.green,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 120),
-              Text(
-                "Your Daily Goal : 2,500 ml",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 30),
-              Container(
-                width: double.infinity,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Total Volume", style: TextStyle(fontSize: 16)),
-                      Text("$waterIntake ml",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
+        child: Stack(
+          children: [
+            // Background
+            Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/background.png'), // Your background
+                  fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(height: 130),
-              TextField(
-                controller: _controller,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Enter custom amount (ml)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 60),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: _Twofiftey,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.green,
+            ),
+            // Foreground
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      "Your Daily Goal : 2,500 ml",
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 30),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: Colors.green, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.local_drink),
-                          Text("250 ml"),
+                          const Text(
+                            "Total Volume",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            "$waterIntake ml",
+                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
                         ],
                       ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: _FiveHundred,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.green,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(FontAwesomeIcons.bottleWater),
-                          Text("500 ml"),
-                        ],
+                    const SizedBox(height: 40),
+                    TextField(
+                      controller: _controller,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'Enter custom amount (ml)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: _Custom,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.green,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(FontAwesomeIcons.plus),
-                          Text("Custom"),
-                        ],
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildWaterButton(Icons.local_drink, "250 ml", () => _addWater(250)),
+                        _buildWaterButton(FontAwesomeIcons.bottleWater, "500 ml", () => _addWater(500)),
+                        _buildWaterButton(FontAwesomeIcons.plus, "Custom", _customAdd),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    ElevatedButton.icon(
+                      onPressed: _saveIntake,
+                      icon: const Icon(Icons.save_alt),
+                      label: const Text("Save Intake"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 5,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: _SaveIntake,
-                child: Text("Save"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWaterButton(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 90,
+        height: 90,
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 28, color: Colors.white),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );

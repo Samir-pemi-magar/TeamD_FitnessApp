@@ -19,69 +19,104 @@ class _ConfirmationpaymentState extends State<Confirmationpayment> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);  // This will navigate back to the previous screen
+            Navigator.pop(context); // Navigate back
           },
         ),
-        title: Text("Confirm Payment"),
+        title: const Text("Confirm Payment"),
         backgroundColor: Colors.green,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Send money:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/background.png'), // same background
+                fit: BoxFit.cover,
               ),
+            ),
+          ),
+
+          // Foreground Content
+          Center(
+            child: SingleChildScrollView(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("You are paying", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
+                  const Text(
+                    "Send money:",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Payment Info Box
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(horizontal: 30),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green, width: 2),
                     ),
-                    child: Text(
-                      "NPR ${widget.packagePrice.toStringAsFixed(2)}",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "You are paying",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
+
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Text(
+                            "NPR ${widget.packagePrice.toStringAsFixed(2)}",
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        const Text("Receiver name: ZenFit fitness club", style: TextStyle(fontSize: 16)),
+                        const Text("Purpose: Package payment", style: TextStyle(fontSize: 16)),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Text("Receiver name: ZenFit fitness club", style: TextStyle(fontSize: 16)),
-                  Text("Purpose: Package payment", style: TextStyle(fontSize: 16)),
+
+                  const SizedBox(height: 30),
+
+                  // Confirm Button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      textStyle: const TextStyle(fontSize: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentStatement(
+                            packageName: widget.packageName,
+                            packagePrice: widget.packagePrice,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text("Confirm"),
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                textStyle: TextStyle(fontSize: 16),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentStatement(
-                      packageName: widget.packageName,
-                      packagePrice: widget.packagePrice,
-                    ),
-                  ),
-                );
-              },
-              child: Text("Confirm"),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

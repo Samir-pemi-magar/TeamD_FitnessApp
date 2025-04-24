@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fitnessapp/services/auth_service.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
-import 'package:fitnessapp/screens/user/user_signup.dart'; 
+import 'package:fitnessapp/screens/user/user_signup.dart';
+import 'package:fitnessapp/screens/user/user_forget_password.dart';
 
 class UserLogin extends StatefulWidget {
   const UserLogin({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class UserLogin extends StatefulWidget {
 }
 
 class _UserLoginState extends State<UserLogin> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
@@ -23,16 +24,14 @@ class _UserLoginState extends State<UserLogin> {
 
     try {
       final user = await _authService.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
+        email: _phoneController.text.trim(), // still using email login for now
         password: _passwordController.text.trim(),
       );
 
       if (user != null) {
-        // Navigates to dashboard
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserDashboard()),
-
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +52,10 @@ class _UserLoginState extends State<UserLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true, // Helps avoid overflow
       body: Container(
+        height: double.infinity,
+        width: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/background.png'),
@@ -61,12 +63,11 @@ class _UserLoginState extends State<UserLogin> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Back Button
                 Align(
                   alignment: Alignment.topLeft,
                   child: IconButton(
@@ -76,7 +77,7 @@ class _UserLoginState extends State<UserLogin> {
                     },
                   ),
                 ),
-                // Logo
+                const SizedBox(height: 20),
                 CircleAvatar(
                   radius: 50,
                   backgroundImage: AssetImage('assets/images/logo.png'),
@@ -92,18 +93,17 @@ class _UserLoginState extends State<UserLogin> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Email Field
                 TextFormField(
-                  controller: _emailController,
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    hintText: 'Enter email...',
+                    hintText: 'Enter phone number...',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -114,8 +114,25 @@ class _UserLoginState extends State<UserLogin> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // Login Button or Loader
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                      );
+                    },
+                    child: const Text(
+                      "Forgot Password?",
+                      style: TextStyle(
+                        color: Colors.white,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : ElevatedButton(
@@ -130,7 +147,6 @@ class _UserLoginState extends State<UserLogin> {
                         child: const Text('Log In'),
                       ),
                 const SizedBox(height: 15),
-                // Redirect to Signup
                 TextButton(
                   onPressed: () {
                     Navigator.push(

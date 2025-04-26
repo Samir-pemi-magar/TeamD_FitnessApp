@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fitnessapp/services/auth_service.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:fitnessapp/screens/user/user_signup.dart';
+
 import 'package:fitnessapp/screens/user/user_forget_password.dart';
+
 
 class UserLogin extends StatefulWidget {
   const UserLogin({Key? key}) : super(key: key);
@@ -17,6 +20,51 @@ class _UserLoginState extends State<UserLogin> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
 
+  void _saveUserEmail() async {
+    final email = _emailController.text.trim();
+
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("email", isEqualTo: email)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final userData = querySnapshot.docs.first.data();
+        final age = userData["age"] ?? "N/A";
+
+        await FirebaseFirestore.instance
+            .collection("selectedUser")
+            .doc("Information")
+            .set({
+          "EmailAddress": email,
+          "Age": age,
+        }, SetOptions(merge: true));
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Email and age saved successfully."),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("User not found."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to save: $error"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _login() async {
     setState(() {
       _isLoading = true;
@@ -29,6 +77,8 @@ class _UserLoginState extends State<UserLogin> {
       );
 
       if (user != null) {
+        _saveUserEmail();
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserDashboard()),
@@ -77,8 +127,11 @@ class _UserLoginState extends State<UserLogin> {
                     },
                   ),
                 ),
+                const CircleAvatar(
+
                 const SizedBox(height: 20),
                 CircleAvatar(
+
                   radius: 50,
                   backgroundImage: AssetImage('assets/images/logo.png'),
                   backgroundColor: Colors.transparent,
@@ -114,6 +167,8 @@ class _UserLoginState extends State<UserLogin> {
                     border: OutlineInputBorder(),
                   ),
                 ),
+                const SizedBox(height: 20),
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -133,6 +188,7 @@ class _UserLoginState extends State<UserLogin> {
                   ),
                 ),
                 const SizedBox(height: 10),
+
                 _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : ElevatedButton(
@@ -151,7 +207,7 @@ class _UserLoginState extends State<UserLogin> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => UserSignup()),
+                      MaterialPageRoute(builder: (context) => const UserSignup()),
                     );
                   },
                   child: const Text(

@@ -22,7 +22,8 @@ class _SubPackageState extends State<SubPackage> {
   }
 
   void fetchPackages() async {
-    final snapshot = await FirebaseFirestore.instance.collection('packages').get();
+    final snapshot =
+        await FirebaseFirestore.instance.collection('packages').get();
     final data = snapshot.docs.map((doc) => doc.data()).toList();
 
     setState(() {
@@ -33,8 +34,8 @@ class _SubPackageState extends State<SubPackage> {
 
         double price = match != null
             ? double.tryParse(match.group(1) ?? '0') ?? 0.0
-            : double.tryParse(
-                    priceString.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+            : double.tryParse(priceString.replaceAll(RegExp(r'[^\d.]'), '')) ??
+                0.0;
 
         return {
           "title": package["title"],
@@ -78,7 +79,6 @@ class _SubPackageState extends State<SubPackage> {
       ),
       body: Stack(
         children: [
-          // Background
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -87,8 +87,6 @@ class _SubPackageState extends State<SubPackage> {
               ),
             ),
           ),
-
-          // Foreground
           dropDownPackages.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : Center(
@@ -97,8 +95,6 @@ class _SubPackageState extends State<SubPackage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
-
-                      // Select Package Text with Border
                       Container(
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.symmetric(horizontal: 30),
@@ -109,15 +105,14 @@ class _SubPackageState extends State<SubPackage> {
                         ),
                         child: const Text(
                           "Select Package:",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
-
                       const SizedBox(height: 50),
-
-                      // Dropdown with Border
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
                         margin: const EdgeInsets.symmetric(horizontal: 30),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.green, width: 2),
@@ -129,7 +124,7 @@ class _SubPackageState extends State<SubPackage> {
                           child: DropdownButton<String>(
                             value: selectedPackage,
                             isExpanded: true,
-                            underline: SizedBox(), // Remove default underline
+                            underline: SizedBox(),
                             onChanged: updatePrice,
                             items: dropDownPackages.map((package) {
                               return DropdownMenuItem<String>(
@@ -140,10 +135,7 @@ class _SubPackageState extends State<SubPackage> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 50),
-
-                      // Total Cost and Button with Border
                       Container(
                         padding: const EdgeInsets.all(20),
                         margin: const EdgeInsets.symmetric(horizontal: 30),
@@ -156,24 +148,68 @@ class _SubPackageState extends State<SubPackage> {
                           children: [
                             Text(
                               "Total Cost: ₹${totalCost.toStringAsFixed(2)}",
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 20),
                             ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Confirmationpayment(
-                                      packageName: selectedPackage!,
-                                      packagePrice: totalCost,
-                                    ),
-                                  ),
-                                );
+                              onPressed: () async {
+                                if (selectedPackage != null) {
+                                  try {
+                                    // Fetch user info
+                                    DocumentSnapshot userInfoSnapshot =
+                                        await FirebaseFirestore.instance
+                                            .collection('selectedUser')
+                                            .doc('Information')
+                                            .get();
+
+                                    final userInfo = userInfoSnapshot.data()
+                                        as Map<String, dynamic>?;
+
+                                    String userEmail =
+                                        userInfo?['EmailAddress'] ?? 'N/A';
+                                    dynamic userAge =
+                                        userInfo?['Age'] ?? 'N/A';
+
+                                    // Save package info under package title as doc ID
+                                    await FirebaseFirestore.instance
+                                        .collection('selectedpackage')
+                                        .doc(selectedPackage)
+                                        .set({
+                                      'packageName': selectedPackage,
+                                      'packagePrice': totalCost,
+                                      'timestamp':
+                                          FieldValue.serverTimestamp(),
+                                      'EmailAddress': userEmail,
+                                      'Age': userAge,
+                                    }, SetOptions(merge: true));
+
+                                    // Navigate to confirmation
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            Confirmationpayment(
+                                          packageName: selectedPackage!,
+                                          packagePrice: totalCost,
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            "Error saving package: $e"),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 40, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),

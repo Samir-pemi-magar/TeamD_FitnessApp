@@ -5,11 +5,8 @@ import 'package:fitnessapp/screens/user/Packages/SubPackage.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_weight_loss_3m.dart';
-//import 'package:fitnessapp/screens/user/Packages/package_store.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'firebase_options.dart';
 
 // Screens
 import 'screens/common/welcome_screen.dart';
@@ -17,8 +14,6 @@ import 'screens/user/user_login.dart';
 import 'screens/user/user_signup.dart';
 import 'screens/user/user_dashboard.dart';
 import 'screens/user/Packages/packages.dart';
-import 'screens/admin/admin_dashboard.dart';
-import 'screens/trainer/trainer_dashboard.dart';
 import 'screens/admin/admin_dashboard.dart';
 import 'screens/admin/admin_package.dart';
 import 'screens/admin/admin_user_stats.dart';

@@ -13,77 +13,57 @@ class AdminDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
+            image: AssetImage('assets/images/background.png'), // Set your actual background path
             fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
-
-              // Logo
+              // Top logo
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 80,
-                    height: 80,
+                  padding: const EdgeInsets.all(16.0),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/logo.png', // Ensure it's a clean, circular logo
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
+              // Welcome text
               const Text(
                 "Welcome To Zenfit",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const Spacer(),
 
-              _buildButton(
-                context,
-                label: 'Available Package',
-                route: '/admin_packages',
-              ),
+              // Menu Buttons
+              _buildMenuButton(context, "Available Package", '/admin_packages'),
+              const SizedBox(height: 20),
+              _buildMenuButton(context, "User Login Stats", '/admin_user_stats'),
+              const SizedBox(height: 20),
+              _buildMenuButton(context, "Add Trainer", '/admin_add_trainer'),
+              const SizedBox(height: 20),
+              _buildMenuButton(context, "Log out", '', isLogout: true),
 
-              const SizedBox(height: 10),
-
-              _buildButton(
-                context,
-                label: 'User Login Stats',
-                route: '/admin_user_stats',
-              ),
-
-              const SizedBox(height: 10),
-
-              _buildButton(
-                context,
-                label: 'Add Trainer',
-                route: '/admin_add_trainer',
-              ),
-
-              const SizedBox(height: 10),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  backgroundColor: Colors.redAccent,
-                ),
-                onPressed: () => _logout(context),
-                child: const Text("Log out"),
-              ),
+              const Spacer(flex: 2),
             ],
           ),
         ),
@@ -91,19 +71,29 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(BuildContext context,
-      {required String label, required String route}) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 40, vertical: 15), // Button size
-        backgroundColor:
-            Colors.white, 
-        foregroundColor:
-            Colors.black, 
+  Widget _buildMenuButton(BuildContext context, String label, String route,
+      {bool isLogout = false}) {
+    return SizedBox(
+      width: 250,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        onPressed: () {
+          if (isLogout) {
+            _logout(context);
+          } else {
+            Navigator.pushNamed(context, route);
+          }
+        },
+        child: Text(label),
       ),
-      onPressed: () => Navigator.pushNamed(context, route),
-      child: Text(label),
     );
   }
 }

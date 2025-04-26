@@ -1,3 +1,4 @@
+import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,7 +17,6 @@ import 'package:fitnessapp/screens/user/WorkoutScreens/adult/adult_muscle_buildi
 
 // SENIOR SCREENS
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_weight_loss.dart';
-import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_weight_loss_3m.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_muscle_building.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_muscle_building_3m.dart';
 
@@ -44,7 +44,7 @@ final Map<String, Widget Function()> workoutScreenRoutes = {
 
   // Senior
   'senior|Weight Loss Package (1 Month)': () => SeniorWeightLossScreen(),
-  'senior|Weight Loss Package (3 Months)': () => SeniorWeightLoss3MonthScreen(),
+  'senior|Weight Loss Package (3 Months)': () => ExercisePackage(),
   'senior|Muscle Building Package (1 Month)':
       () => SeniorMuscleBuildingScreen(),
   'senior|Muscle Building Package (3 Months)':

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -75,7 +76,6 @@ class _UserDashboardState extends State<UserDashboard> {
 
     switch (index) {
       case 0:
-        // Navigate to UserDashboard
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserDashboard()),
@@ -92,11 +92,10 @@ class _UserDashboardState extends State<UserDashboard> {
         // Navigate to Packages
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Packages()),  // Replace with actual class
+          MaterialPageRoute(builder: (context) => Packages()),
         );
         break;
       case 3:
-        // Profile navigation placeholder
         print("Profile screen not made yet");
         break;
     }
@@ -248,7 +247,7 @@ class _UserDashboardState extends State<UserDashboard> {
                       SizedBox(width: 100),
                       GestureDetector(
                         onTap: () {
-                          print("Fitness Goal tapped!");
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ExercisePackage()));
                         },
                         child: Container(
                           width: 90,
@@ -279,7 +278,7 @@ class _UserDashboardState extends State<UserDashboard> {
                           width: 90,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Color(0xFFF7E9AE),
+                            color: Color.fromARGB(102, 247, 232, 174),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -322,7 +321,7 @@ class _UserDashboardState extends State<UserDashboard> {
         ],
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
-        backgroundColor: Color(0xFFF7E9AE),  // This is the background color of the navigation bar
+        backgroundColor: Color(0xFFF7E9AE),
       ),
     );
   }

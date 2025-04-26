@@ -11,7 +11,6 @@ class Packages extends StatefulWidget {
 }
 
 class _PackagesState extends State<Packages> {
-  String? Selectedpackage = "";
   List<Map<String, dynamic>> FetchedPackages = [];
 
   @override
@@ -60,12 +59,6 @@ class _PackagesState extends State<Packages> {
                 margin: EdgeInsets.all(10),
                 child: InkWell(
                   onTap: () {
-                    setState(() {
-                      Selectedpackage = FetchedPackages[index]["title"];
-                    });
-                    FirebaseFirestore.instance.collection('selectedPackage').doc('selected').set({
-                      'selectedpackage': Selectedpackage,
-                    }, SetOptions(merge: true));
                     Navigator.push(context, MaterialPageRoute(builder: (context) => SubPackage()));
                   },
                   child: ListTile(

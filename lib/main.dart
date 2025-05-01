@@ -1,10 +1,4 @@
 import 'package:fitnessapp/firebase_options.dart';
-import 'package:fitnessapp/screens/trainer/TrainerExerciseAdd.dart';
-import 'package:fitnessapp/screens/user/Packages/Package_Store.dart';
-import 'package:fitnessapp/screens/user/Packages/SubPackage.dart';
-import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
-import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
-import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_weight_loss_3m.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -18,6 +12,7 @@ import 'screens/admin/admin_dashboard.dart';
 import 'screens/admin/admin_package.dart';
 import 'screens/admin/admin_user_stats.dart';
 import 'screens/admin/admin_add_trainer.dart';
+import 'screens/admin/admin_forget_password.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/admin_user_stats': (context) => const AdminUserStatsPage(),
         '/admin_packages': (context) => const AdminPackagesScreen(),
         '/admin_add_trainer': (context) => const AdminAddTrainer(),
+        '/adminForgotPassword': (_) => const AdminForgotPasswordScreen(),
       },
     );
   }

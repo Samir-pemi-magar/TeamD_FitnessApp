@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fitnessapp/services/auth_service.dart';
+import 'admin_dashboard.dart';
+import 'admin_forget_password.dart';
 
 class AdminLogin extends StatefulWidget {
   const AdminLogin({Key? key}) : super(key: key);
@@ -11,7 +13,7 @@ class AdminLogin extends StatefulWidget {
 class _AdminLoginState extends State<AdminLogin> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
+
   bool _isLoading = false;
 
   void _login() async {
@@ -19,18 +21,35 @@ class _AdminLoginState extends State<AdminLogin> {
       _isLoading = true;
     });
 
-    try {
-      final result = await _authService.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-      if (result != null && result['role'] == 'admin') {
-        Navigator.pushReplacementNamed(context, '/admin_dashboard');
-      } else {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .where('role', isEqualTo: 'admin')
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Access denied. Not an admin account.')),
         );
+      } else {
+        final adminData = snapshot.docs.first.data();
+        final storedPassword = adminData['password'];
+
+        if (storedPassword == password) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminDashboard()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Incorrect password.')),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -76,7 +95,7 @@ class _AdminLoginState extends State<AdminLogin> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          CircleAvatar(
+                          const CircleAvatar(
                             radius: 50,
                             backgroundImage: AssetImage('assets/images/logo.png'),
                             backgroundColor: Colors.transparent,
@@ -120,11 +139,16 @@ class _AdminLoginState extends State<AdminLogin> {
                           ),
                           TextButton(
                             onPressed: () {
-                              // TODO: Implement forgot password if needed
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AdminForgotPasswordScreen(),
+                                ),
+                              );
                             },
-                            child: const Text(
-                              "Forgot Password?",
-                              style: TextStyle(color: Colors.white),
+                            child: const Text('Forgot Password?'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
                             ),
                           ),
                           const Spacer(),

@@ -5,6 +5,7 @@ import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.da
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 
 class UserDashboard extends StatefulWidget {
   UserDashboard({super.key});
@@ -32,7 +33,6 @@ class _UserDashboardState extends State<UserDashboard> {
         .collection('CaloriesDataset')
         .doc('Calories')
         .set({'Calories': cal}, SetOptions(merge: true));
-
     getCaloriesData();
   }
 
@@ -41,7 +41,6 @@ class _UserDashboardState extends State<UserDashboard> {
       'Weight': cal,
       'timestamp': FieldValue.serverTimestamp(),
     });
-
     getWeightsData();
   }
 
@@ -82,21 +81,22 @@ class _UserDashboardState extends State<UserDashboard> {
         );
         break;
       case 1:
-        // Navigate to WaterIntake
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => WaterIntake()),
         );
         break;
       case 2:
-        // Navigate to Packages
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Packages()),
         );
         break;
       case 3:
-        print("Profile screen not made yet");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+        );
         break;
     }
   }
@@ -227,7 +227,8 @@ class _UserDashboardState extends State<UserDashboard> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => WaterIntake()));
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => WaterIntake()));
                         },
                         child: Container(
                           width: 90,
@@ -247,7 +248,8 @@ class _UserDashboardState extends State<UserDashboard> {
                       SizedBox(width: 100),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ExercisePackage()));
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => ExercisePackage()));
                         },
                         child: Container(
                           width: 90,

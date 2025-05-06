@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'admin_dashboard.dart';
 import 'admin_forget_password.dart';
@@ -13,7 +14,6 @@ class AdminLogin extends StatefulWidget {
 class _AdminLoginState extends State<AdminLogin> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _isLoading = false;
 
   void _login() async {
@@ -25,32 +25,45 @@ class _AdminLoginState extends State<AdminLogin> {
     final password = _passwordController.text.trim();
 
     try {
-      final snapshot = await FirebaseFirestore.instance
+      // 1. Sign in with Firebase Auth
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final uid = userCredential.user?.uid;
+
+      if (uid == null) {
+        throw Exception("User ID not found.");
+      }
+
+      // 2. Check Firestore for 'admin' role
+      final doc = await FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: email)
-          .where('role', isEqualTo: 'admin')
-          .limit(1)
+          .doc(uid)
           .get();
 
-      if (snapshot.docs.isEmpty) {
+      if (!doc.exists || doc.data()?['role'] != 'admin') {
+        await FirebaseAuth.instance.signOut(); // Logout if not admin
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Access denied. Not an admin account.')),
         );
-      } else {
-        final adminData = snapshot.docs.first.data();
-        final storedPassword = adminData['password'];
-
-        if (storedPassword == password) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminDashboard()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Incorrect password.')),
-          );
-        }
+        return;
       }
+
+      // 3. Navigate to admin dashboard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const AdminDashboard()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Login failed';
+      if (e.code == 'user-not-found') {
+        message = 'No user found with this email.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Incorrect password.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),

@@ -1,4 +1,5 @@
 import 'package:fitnessapp/firebase_options.dart';
+import 'package:fitnessapp/screens/admin/admin_update_password.dart';
 import 'package:fitnessapp/screens/trainer/TrainerExerciseAdd.dart';
 import 'package:fitnessapp/screens/trainer/editexercise.dart';
 import 'package:fitnessapp/screens/trainer/trainer_dashboard.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
         '/admin_packages': (context) => const AdminPackagesScreen(),
         '/admin_add_trainer': (context) => const AdminAddTrainer(),
         '/adminForgotPassword': (_) => const AdminForgotPasswordScreen(),
+        '/admin_update_password': (context) => const AdminUpdatePasswordScreen(),
       },
     );
   }

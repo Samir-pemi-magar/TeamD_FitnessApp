@@ -31,7 +31,7 @@ class AdminDashboard extends StatelessWidget {
                   padding: const EdgeInsets.all(16.0),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/images/logo.png', // Ensure it's a clean, circular logo
+                      'assets/images/logo.png',
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
@@ -42,7 +42,6 @@ class AdminDashboard extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Welcome text
               const Text(
                 "Welcome To Zenfit",
                 style: TextStyle(
@@ -54,13 +53,17 @@ class AdminDashboard extends StatelessWidget {
 
               const Spacer(),
 
-              // Menu Buttons
               _buildMenuButton(context, "Available Package", '/admin_packages'),
               const SizedBox(height: 20),
               _buildMenuButton(context, "User Login Stats", '/admin_user_stats'),
               const SizedBox(height: 20),
               _buildMenuButton(context, "Add Trainer", '/admin_add_trainer'),
               const SizedBox(height: 20),
+
+              // 🔐 New Button to navigate to admin_update_password screen
+              _buildMenuButton(context, "Update Password", '/admin_update_password'),
+              const SizedBox(height: 20),
+
               _buildMenuButton(context, "Log out", '', isLogout: true),
 
               const Spacer(flex: 2),

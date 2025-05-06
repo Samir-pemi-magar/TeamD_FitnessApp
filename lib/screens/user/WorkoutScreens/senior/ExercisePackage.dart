@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExerciseDetails.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -40,13 +41,13 @@ class _ExercisePackageState extends State<ExercisePackage> {
       String collectionName;
 
       if (age >= 15 && age <= 24) {
-        collectionName = 'WeightLoss(15-24)';
+        collectionName = '(15-24)';
         ageRangeLabel = "Young Adults (15-24)";
       } else if (age >= 25 && age <= 39) {
-        collectionName = 'WeightLoss(25-39)';
+        collectionName = '(25-39)';
         ageRangeLabel = "Adults (25-39)";
       } else {
-        collectionName = 'WeightLoss(40+)';
+        collectionName = '(40+)';
         ageRangeLabel = "Seniors (40+)";
       }
 
@@ -55,8 +56,9 @@ class _ExercisePackageState extends State<ExercisePackage> {
 
       if (!mounted) return;
       setState(() {
-        fetchedExercise =
-            snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+        fetchedExercise = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
       });
     } catch (e) {
       print("Error fetching information: $e");
@@ -216,16 +218,24 @@ class _ExercisePackageState extends State<ExercisePackage> {
                         return Card(
                           margin: EdgeInsets.all(10),
                           child: InkWell(
-                            onTap: () {
+                            onTap: () async {
                               if (!mounted) return;
                               setState(() {
                                 SelectedExercise = package["title"];
                               });
 
+                              // Store selected exercise in Firestore
+                              await FirebaseFirestore.instance
+                                  .collection('selectedExercise')
+                                  .doc('info')
+                                  .set({
+                                'selectedexercise': package["title"],
+                              }, SetOptions(merge: true));
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => WaterIntake(),
+                                  builder: (context) => ExerciseDetailsPage(),
                                 ),
                               );
                             },

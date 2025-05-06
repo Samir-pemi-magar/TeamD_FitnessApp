@@ -1,4 +1,13 @@
 import 'package:fitnessapp/firebase_options.dart';
+import 'package:fitnessapp/screens/trainer/TrainerExerciseAdd.dart';
+import 'package:fitnessapp/screens/trainer/editexercise.dart';
+import 'package:fitnessapp/screens/trainer/trainer_dashboard.dart';
+import 'package:fitnessapp/screens/user/Packages/Package_Store.dart';
+import 'package:fitnessapp/screens/user/Packages/SubPackage.dart';
+import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExerciseDetails.dart';
+import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
+import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_weight_loss_3m.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 

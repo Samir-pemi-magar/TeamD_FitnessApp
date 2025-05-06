@@ -32,11 +32,11 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
 
       String collectionName;
       if (age >= 15 && age <= 24) {
-        collectionName = 'WeightLoss(15-24)';
+        collectionName = '(15-24)';
       } else if (age >= 25 && age <= 39) {
-        collectionName = 'WeightLoss(25-39)';
+        collectionName = '(25-39)';
       } else {
-        collectionName = 'WeightLoss(40+)';
+        collectionName = '(40+)';
       }
 
       FirebaseFirestore.instance.collection(collectionName).add({
@@ -219,7 +219,7 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: AddToDatabase,
                   child: Text("Save Exercise"),

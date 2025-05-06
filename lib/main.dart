@@ -21,6 +21,7 @@ import 'screens/admin/admin_dashboard.dart';
 import 'screens/admin/admin_package.dart';
 import 'screens/admin/admin_user_stats.dart';
 import 'screens/admin/admin_add_trainer.dart';
+import 'screens/admin/admin_forget_password.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/welcome',
       routes: {
-        '/welcome': (context) => ExercisePackage(),
+        '/welcome': (context) => WelcomeScreen(),
         '/login': (context) => const UserLogin(),
         '/signup': (context) => const UserSignup(),
         '/user_dashboard': (context) => UserDashboard(),
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
         '/admin_user_stats': (context) => const AdminUserStatsPage(),
         '/admin_packages': (context) => const AdminPackagesScreen(),
         '/admin_add_trainer': (context) => const AdminAddTrainer(),
+        '/adminForgotPassword': (_) => const AdminForgotPasswordScreen(),
       },
     );
   }

@@ -37,25 +37,24 @@ class _UserLoginState extends State<UserLogin> {
             .collection('selectedUser')
             .doc('Information')
             .set({
-              'EmailAddress': _emailController.text.trim(),
-              'Age': 18,
-            });
+          'EmailAddress': _emailController.text.trim(),
+          'Age': 18,
+        });
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => UserDashboard()),
+          MaterialPageRoute(builder: (_) => const UserDashboard()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Login failed. Please check your credentials.'),
-          ),
+              content: Text('Login failed. Please check your credentials.')),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error during login: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error during login: $e')),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -135,7 +134,8 @@ class _UserLoginState extends State<UserLogin> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const ForgotPasswordScreen(),
+                                  builder: (_) =>
+                                      const ForgotPasswordScreen(),
                                 ),
                               );
                             },
@@ -151,35 +151,28 @@ class _UserLoginState extends State<UserLogin> {
                         const SizedBox(height: 10),
                         _isLoading
                             ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                                color: Colors.white,
+                              )
                             : ElevatedButton(
-                              onPressed: _login,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 30,
-                                  vertical: 12,
+                                onPressed: _login,
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 30, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  backgroundColor: const Color.fromARGB(
+                                      255, 128, 202, 138),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  128,
-                                  202,
-                                  138,
-                                ),
+                                child: const Text('Log In'),
                               ),
-                              child: const Text('Log In'),
-                            ),
                         const SizedBox(height: 15),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const UserSignup(),
-                              ),
+                                  builder: (_) => const UserSignup()),
                             );
                           },
                           child: const Text(

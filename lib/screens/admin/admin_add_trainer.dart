@@ -13,6 +13,7 @@ class AdminAddTrainerState extends State<AdminAddTrainer> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -46,110 +47,45 @@ class AdminAddTrainerState extends State<AdminAddTrainer> {
                 children: [
                   TextFormField(
                     controller: _nameController,
-                    decoration: InputDecoration(
-                      hintText: "Enter name...",
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.7),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the name';
-                      }
-                      return null;
-                    },
+                    decoration: _buildInputDecoration("Enter name..."),
+                    validator: _validateNotEmpty("name"),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(
-                      hintText: "Enter email...",
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.7),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    decoration: _buildInputDecoration("Enter email..."),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the email';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Please enter a valid email';
-                      }
+                      if (value == null || value.isEmpty) return 'Please enter the email';
+                      if (!value.contains('@')) return 'Please enter a valid email';
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
+                  TextFormField(
+                    controller: _phoneController,
+                    decoration: _buildInputDecoration("Enter phone number..."),
+                    keyboardType: TextInputType.phone,
+                    validator: _validateNotEmpty("phone number"),
+                  ),
+                  const SizedBox(height: 15),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: InputDecoration(
-                      hintText: "Enter password...",
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.7),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
                     obscureText: true,
+                    decoration: _buildInputDecoration("Enter password..."),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
+                      if (value == null || value.isEmpty) return 'Please enter the password';
+                      if (value.length < 6) return 'Password must be at least 6 characters';
                       return null;
                     },
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 25),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       textStyle: const TextStyle(fontSize: 16),
                     ),
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        try {
-                          // Store trainer information in Firebase
-                          await FirebaseFirestore.instance.collection('users').add({
-                            'name': _nameController.text.trim(),
-                            'email': _emailController.text.trim(),
-                            'role': 'trainer', // Set the role as 'trainer'
-                            'password': _passwordController.text.trim(),
-                          });
-
-                          // Show a success message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Trainer added successfully!",
-                                  style: TextStyle(color: Colors.white)),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-
-                          // Clear the text fields
-                          _nameController.clear();
-                          _emailController.clear();
-                          _passwordController.clear();
-                        } catch (e) {
-                          // Show an error message if something goes wrong
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Failed to add trainer: $e",
-                                  style: const TextStyle(color: Colors.white)),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
+                    onPressed: _addTrainer,
                     child: const Text("Create", style: TextStyle(color: Colors.white)),
                   ),
                 ],
@@ -161,10 +97,60 @@ class AdminAddTrainerState extends State<AdminAddTrainer> {
     );
   }
 
+  InputDecoration _buildInputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.7),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  String? Function(String?) _validateNotEmpty(String field) {
+    return (value) => value == null || value.isEmpty ? 'Please enter the $field' : null;
+  }
+
+  Future<void> _addTrainer() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseFirestore.instance.collection('users').add({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'phoneNumber': _phoneController.text.trim(), // Make sure this key is correct
+          'password': _passwordController.text.trim(),
+          'role': 'trainer',
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Trainer added successfully!", style: TextStyle(color: Colors.white)),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        _nameController.clear();
+        _emailController.clear();
+        _phoneController.clear();
+        _passwordController.clear();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to add trainer: $e", style: const TextStyle(color: Colors.white)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

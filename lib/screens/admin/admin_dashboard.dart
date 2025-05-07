@@ -17,14 +17,13 @@ class AdminDashboard extends StatelessWidget {
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/background.png'), // Set your actual background path
+            image: AssetImage('assets/images/background.png'),
             fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              // Top logo
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
@@ -39,9 +38,7 @@ class AdminDashboard extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               const Text(
                 "Welcome To Zenfit",
                 style: TextStyle(
@@ -50,22 +47,18 @@ class AdminDashboard extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-
               const Spacer(),
-
               _buildMenuButton(context, "Available Package", '/admin_packages'),
               const SizedBox(height: 20),
               _buildMenuButton(context, "User Login Stats", '/admin_user_stats'),
               const SizedBox(height: 20),
+              _buildMenuButton(context, "Trainer Login Stats", '/admin_trainer_stats'),
+              const SizedBox(height: 20),
               _buildMenuButton(context, "Add Trainer", '/admin_add_trainer'),
               const SizedBox(height: 20),
-
-              // 🔐 New Button to navigate to admin_update_password screen
               _buildMenuButton(context, "Update Password", '/admin_update_password'),
               const SizedBox(height: 20),
-
               _buildMenuButton(context, "Log out", '', isLogout: true),
-
               const Spacer(flex: 2),
             ],
           ),

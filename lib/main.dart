@@ -21,6 +21,7 @@ import 'screens/user/Packages/packages.dart';
 import 'screens/admin/admin_dashboard.dart';
 import 'screens/admin/admin_package.dart';
 import 'screens/admin/admin_user_stats.dart';
+import 'screens/admin/admin_trainer_stats.dart';
 import 'screens/admin/admin_add_trainer.dart';
 import 'screens/admin/admin_forget_password.dart';
 
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
         // '/trainer_dashboard': (context) => TrainerDashboard(),
         '/packages': (context) => Packages(),
         '/admin_user_stats': (context) => const AdminUserStatsPage(),
+        '/admin_trainer_stats': (context) => const AdminTrainerStatsPage(),
         '/admin_packages': (context) => const AdminPackagesScreen(),
         '/admin_add_trainer': (context) => const AdminAddTrainer(),
         '/adminForgotPassword': (_) => const AdminForgotPasswordScreen(),

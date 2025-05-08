@@ -1,5 +1,10 @@
 import 'package:fitnessapp/screens/user/Packages/PaymentStatement.dart';
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Confirmationpayment extends StatefulWidget {
   final String packageName;
@@ -12,6 +17,41 @@ class Confirmationpayment extends StatefulWidget {
 }
 
 class _ConfirmationpaymentState extends State<Confirmationpayment> {
+  int _selectedIndex = 2;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WaterIntake()),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Packages()),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+        );
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +157,33 @@ class _ConfirmationpaymentState extends State<Confirmationpayment> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.house),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.droplet),
+            label: 'Water Intake',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.box),
+            label: 'Packages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.user),
+            label: 'Profile',
+          ),
+        ],
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.black,
+        backgroundColor: Color(0xFFF7E9AE),
+
       ),
     );
   }

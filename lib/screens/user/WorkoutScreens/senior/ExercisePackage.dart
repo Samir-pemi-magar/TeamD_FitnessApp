@@ -3,6 +3,7 @@ import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExerciseDetails.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -129,7 +130,10 @@ class _ExercisePackageState extends State<ExercisePackage> {
         );
         break;
       case 3:
-        print("Profile screen not made yet");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+        );
         break;
     }
   }

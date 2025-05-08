@@ -1,5 +1,10 @@
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExerciseDetailsPage extends StatefulWidget {
   @override
@@ -10,6 +15,8 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   List<Map<String, dynamic>> exercises = [];
   String ageRangeLabel = '';
   String? selectedTitle;
+  int _selectedIndex = 0;
+  bool hasError = false;
 
   @override
   void initState() {
@@ -19,7 +26,6 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
 
   Future<void> fetchSelectedExercise() async {
     try {
-      // Fetch selected exercise title
       DocumentSnapshot selectedDoc = await FirebaseFirestore.instance
           .collection('selectedExercise')
           .doc('info')
@@ -27,16 +33,16 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
 
       if (!selectedDoc.exists) {
         print("No selected exercise found.");
+        setState(() => hasError = true);
         return;
       }
 
       selectedTitle = selectedDoc['selectedexercise'];
       print("Selected Exercise Title: $selectedTitle");
-
-      // After getting the title, fetch exercises
       await getExercises();
     } catch (e) {
       print("Error fetching selected exercise: $e");
+      setState(() => hasError = true);
     }
   }
 
@@ -49,6 +55,7 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
 
       if (!userDoc.exists) {
         print("User document does not exist.");
+        setState(() => hasError = true);
         return;
       }
 
@@ -69,7 +76,6 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
       QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection(collectionName).get();
 
-      // Filter only selected exercise
       List<Map<String, dynamic>> allExercises = snapshot.docs
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
@@ -83,6 +89,40 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
       });
     } catch (e) {
       print("Error fetching exercises: $e");
+      setState(() => hasError = true);
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WaterIntake()),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Packages()),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+        );
+        break;
     }
   }
 
@@ -90,40 +130,99 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 9, 188, 101),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Packages()),
+            );
+          },
+        ),
         title: Text('Exercise Details'),
       ),
-      body: exercises.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: exercises.length,
-              itemBuilder: (context, index) {
-                final exercise = exercises[index];
-                return Card(
-                  margin: EdgeInsets.all(12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (exercise['imagePath'] != null)
-                          Image.asset(exercise['imagePath'], fit: BoxFit.cover),
-                        SizedBox(height: 12),
-                        Text(
-                          exercise['title'],
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 8),
-                        Text(exercise['detail']),
-                      ],
+      body: hasError
+          ? Center(child: Text('Something went wrong. Please try again.'))
+          : exercises.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/background.png'),
+                      fit: BoxFit.cover,
                     ),
                   ),
-                );
-              },
-            ),
+                  child: ListView.builder(
+                    itemCount: exercises.length,
+                    itemBuilder: (context, index) {
+                      final exercise = exercises[index];
+                      final imagePath = exercise['imagePath'];
+
+                      return Card(
+                        color: Color.fromRGBO(255, 255, 255, 0.518),
+                        margin: EdgeInsets.all(12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (imagePath != null)
+                                imagePath.toString().startsWith('http')
+                                    ? Image.network(imagePath,
+                                        fit: BoxFit.cover)
+                                    : Image.asset(imagePath,
+                                        fit: BoxFit.cover),
+                              SizedBox(height: 12),
+                              Text(
+                                exercise['title'] ?? 'No Title',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(exercise['detail'] ?? 'No description.'),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.house),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.droplet),
+            label: 'Water Intake',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.box),
+            label: 'Packages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.user),
+            label: 'Profile',
+          ),
+        ],
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.black,
+        backgroundColor: Color(0xFFF7E9AE),
+
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/WeightRecordView.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ class UserDashboard extends StatefulWidget {
 
 class _UserDashboardState extends State<UserDashboard> {
   double cal = 0;
+  String? emailAddress;
   List<dynamic> calories = [];
   List<dynamic> weights = [];
   TextEditingController _controller = TextEditingController();
@@ -24,8 +26,11 @@ class _UserDashboardState extends State<UserDashboard> {
   @override
   void initState() {
     super.initState();
-    getCaloriesData();
-    getWeightsData();
+    Future.microtask(() async {
+      await _readEmailAddress();
+      getCaloriesData();
+      getWeightsData();
+    });
   }
 
   void _createCaloriesData() async {
@@ -36,12 +41,48 @@ class _UserDashboardState extends State<UserDashboard> {
     getCaloriesData();
   }
 
+  Future<void> _readEmailAddress() async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('selectedUser')
+          .doc('Information')
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          emailAddress = doc.get('EmailAddress');
+        });
+      } else {
+        print("Document does not exist.");
+      }
+    } catch (e) {
+      print("Error fetching email address: $e");
+    }
+  }
+
   void _createWeightData() async {
+    if (emailAddress == null) {
+      print("EmailAddress is not loaded yet.");
+      return;
+    }
+
     await FirebaseFirestore.instance.collection('WeightDataset').add({
+      'EmailAddress': emailAddress,
       'Weight': cal,
       'timestamp': FieldValue.serverTimestamp(),
     });
+
     getWeightsData();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Weight saved successfully!'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   void getCaloriesData() async {
@@ -208,13 +249,25 @@ class _UserDashboardState extends State<UserDashboard> {
                           ),
                           SizedBox(height: 30),
                           ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                cal = double.tryParse(_controller.text) ?? 0;
-                                _createWeightData();
-                                _controller.clear();
-                              });
-                            },
+                            onPressed: emailAddress == null
+                                ? null
+                                : () {
+                                    if (_controller.text.trim().isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Weight field cannot be empty!'),
+                                          duration: Duration(seconds: 2),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    } else {
+                                      setState(() {
+                                        cal = double.tryParse(_controller.text) ?? 0;
+                                        _createWeightData();
+                                        _controller.clear();
+                                      });
+                                    }
+                                  },
                             child: Text('Save Weight'),
                           ),
                         ],
@@ -274,13 +327,14 @@ class _UserDashboardState extends State<UserDashboard> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          print("Weight Record tapped!");
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => WeightRecordView()));
                         },
                         child: Container(
                           width: 90,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(102, 247, 232, 174),
+                            color: Color(0xFFF7E9AE),
                             shape: BoxShape.circle,
                           ),
                           child: Center(

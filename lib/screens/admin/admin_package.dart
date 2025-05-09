@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'admin_add_package.dart';
 
 class AdminPackagesScreen extends StatelessWidget {
   const AdminPackagesScreen({Key? key}) : super(key: key);
@@ -30,7 +31,7 @@ class AdminPackagesScreen extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('packages')
-                .orderBy(FieldPath.documentId, descending: false)// Order by oldest first
+                .orderBy(FieldPath.documentId, descending: false)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
@@ -49,8 +50,26 @@ class AdminPackagesScreen extends StatelessWidget {
 
               return ListView.builder(
                 padding: const EdgeInsets.all(16.0),
-                itemCount: packages.length,
+                itemCount: packages.length + 1, 
                 itemBuilder: (context, index) {
+                  if (index == packages.length) {
+                    // Plus card
+                    return Card(
+                      color: Colors.white.withOpacity(0.8),
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      child: ListTile(
+                        leading: const Icon(Icons.add, color: Colors.green, size: 30),
+                        title: const Text("Add New Package", style: TextStyle(fontWeight: FontWeight.bold)),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => AddPackageScreen()),
+                          );
+                        },
+                      ),
+                    );
+                  }
+
                   final package = packages[index];
                   final title = package['title'] as String? ?? 'No Title';
                   final description = package['description'] as String? ?? 'No Description';
@@ -128,7 +147,7 @@ class AdminPackagesScreen extends StatelessWidget {
                 ));
               }
             },
-            child: const Text("Save", style: TextStyle(color: Colors.white)),
+            child: const Text("Save", style: TextStyle(color: Colors.green)),
           ),
         ],
       ),

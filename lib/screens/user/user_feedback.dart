@@ -11,32 +11,48 @@ class LeaveFeedbackScreen extends StatefulWidget {
 
 class _LeaveFeedbackScreenState extends State<LeaveFeedbackScreen> {
   final _feedbackController = TextEditingController();
-  String _errorMessage = "";
+  String _message = "";
+  bool _isSuccess = false;
 
   void _submitFeedback() async {
-    String feedback = _feedbackController.text;
+    final feedback = _feedbackController.text.trim();
+
     if (feedback.isEmpty) {
       setState(() {
-        _errorMessage = "Feedback cannot be empty";
+        _message = "Feedback cannot be empty.";
+        _isSuccess = false;
       });
       return;
     }
 
     try {
-      User? user = FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        setState(() {
+          _message = "User not logged in.";
+          _isSuccess = false;
+        });
+        return;
+      }
+
       await FirebaseFirestore.instance.collection('feedback').add({
-        'userId': user?.uid,
+        'userId': user.uid,
         'feedback': feedback,
         'timestamp': FieldValue.serverTimestamp(),
+        'trainerReply': null, // allows trainer to reply later
       });
 
       setState(() {
-        _errorMessage = "Feedback submitted successfully!";
+        _message = "✅ Feedback submitted successfully!";
+        _isSuccess = true;
       });
+
       _feedbackController.clear();
     } catch (e) {
       setState(() {
-        _errorMessage = "Error: $e";
+        _message = "❌ Error submitting feedback: $e";
+        _isSuccess = false;
       });
     }
   }
@@ -44,9 +60,7 @@ class _LeaveFeedbackScreenState extends State<LeaveFeedbackScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Leave Feedback'),
-      ),
+      appBar: AppBar(title: const Text('Leave Feedback')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -54,20 +68,26 @@ class _LeaveFeedbackScreenState extends State<LeaveFeedbackScreen> {
             TextField(
               controller: _feedbackController,
               maxLines: 5,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Enter your feedback',
                 border: OutlineInputBorder(),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitFeedback,
-              child: Text('Submit Feedback'),
+              child: const Text('Submit Feedback'),
             ),
-            if (_errorMessage.isNotEmpty) ...[
-              SizedBox(height: 10),
-              Text(_errorMessage, style: TextStyle(color: Colors.red)),
-            ]
+            if (_message.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                _message,
+                style: TextStyle(
+                  color: _isSuccess ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ],
         ),
       ),

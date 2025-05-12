@@ -6,10 +6,12 @@ class AdminUpdatePasswordScreen extends StatefulWidget {
   const AdminUpdatePasswordScreen({super.key});
 
   @override
-  _AdminUpdatePasswordScreenState createState() => _AdminUpdatePasswordScreenState();
+  _AdminUpdatePasswordScreenState createState() =>
+      _AdminUpdatePasswordScreenState();
 }
 
-class _AdminUpdatePasswordScreenState extends State<AdminUpdatePasswordScreen> {
+class _AdminUpdatePasswordScreenState
+    extends State<AdminUpdatePasswordScreen> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -46,7 +48,8 @@ class _AdminUpdatePasswordScreenState extends State<AdminUpdatePasswordScreen> {
       }
 
       final uid = user.uid;
-      final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final docRef =
+          FirebaseFirestore.instance.collection('users').doc(uid);
       final docSnapshot = await docRef.get();
 
       if (!docSnapshot.exists) {
@@ -58,7 +61,6 @@ class _AdminUpdatePasswordScreenState extends State<AdminUpdatePasswordScreen> {
       }
 
       final storedPassword = docSnapshot['password'];
-
       if (storedPassword != currentPassword) {
         setState(() {
           _statusMessage = "Current password is incorrect.";
@@ -67,20 +69,10 @@ class _AdminUpdatePasswordScreenState extends State<AdminUpdatePasswordScreen> {
         return;
       }
 
-      // Re-authenticate the admin
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: currentPassword,
-      );
-
-      await user.reauthenticateWithCredential(credential);
-      await user.updatePassword(newPassword);
-
-      // Update Firestore password field
       await docRef.update({'password': newPassword});
 
       setState(() {
-        _statusMessage = "Password updated successfully!";
+        _statusMessage = "✅ Password updated successfully!";
         _isLoading = false;
       });
 
@@ -89,7 +81,7 @@ class _AdminUpdatePasswordScreenState extends State<AdminUpdatePasswordScreen> {
       _confirmPasswordController.clear();
     } catch (e) {
       setState(() {
-        _statusMessage = "Error: ${e.toString()}";
+        _statusMessage = "❌ Error: ${e.toString()}";
         _isLoading = false;
       });
     }
@@ -106,39 +98,106 @@ class _AdminUpdatePasswordScreenState extends State<AdminUpdatePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Admin Update Password'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: _currentPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Current Password'),
-            ),
-            TextField(
-              controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'New Password'),
-            ),
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Confirm New Password'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _updateAdminPassword,
-              child: _isLoading ? const CircularProgressIndicator() : const Text('Update Password'),
-            ),
-            if (_statusMessage.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(_statusMessage, style: TextStyle(color: _statusMessage.contains("success") ? Colors.green : Colors.red)),
-            ]
-          ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
+      ),
+      body: Stack(
+        children: [
+          SizedBox.expand(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  const Text(
+                    'Admin Update Password',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _currentPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Current Password',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _newPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'New Password',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm New Password',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _updateAdminPassword,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(fontSize: 16),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                          : const Text('Update Password'),
+                    ),
+                  ),
+                  if (_statusMessage.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      _statusMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: _statusMessage.contains("✅")
+                            ? Colors.greenAccent
+                            : Colors.redAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ]
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

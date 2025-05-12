@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'admin_login.dart'; // adjust this import to your actual path
+import 'admin_dashboard.dart';
 
 class AdminForgotPasswordScreen extends StatefulWidget {
   const AdminForgotPasswordScreen({Key? key}) : super(key: key);
@@ -10,12 +10,13 @@ class AdminForgotPasswordScreen extends StatefulWidget {
 }
 
 class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
-  final TextEditingController _phoneController            = TextEditingController();
-  final TextEditingController _newPasswordController      = TextEditingController();
-  final TextEditingController _confirmPasswordController  = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _phoneVerified = false;
   String? _adminDocId;
+  String? _verifiedRole;
 
   Future<void> _verifyPhoneNumber() async {
     final phone = _phoneController.text.trim();
@@ -25,7 +26,6 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
       final snap = await FirebaseFirestore.instance
           .collection('users')
           .where('phoneNumber', isEqualTo: phone)
-          .where('role', isEqualTo: 'admin')
           .limit(1)
           .get();
 
@@ -33,12 +33,22 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Phone number not found.')),
         );
-      } else {
-        setState(() {
-          _phoneVerified = true;
-          _adminDocId    = snap.docs.first.id;
-        });
+        return;
       }
+
+      final userData = snap.docs.first.data();
+      if (userData['role'] != 'admin') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('This password reset is for admins only.')),
+        );
+        return;
+      }
+
+      setState(() {
+        _phoneVerified = true;
+        _adminDocId = snap.docs.first.id;
+        _verifiedRole = userData['role'];
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error verifying phone: $e')),
@@ -47,7 +57,7 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
   }
 
   Future<void> _resetPassword() async {
-    final newPwd     = _newPasswordController.text.trim();
+    final newPwd = _newPasswordController.text.trim();
     final confirmPwd = _confirmPasswordController.text.trim();
 
     if (newPwd != confirmPwd) {
@@ -56,9 +66,14 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
       );
       return;
     }
-    if (_adminDocId == null) return;
+    if (_adminDocId == null || _verifiedRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unauthorized access.')),
+      );
+      return;
+    }
 
-    // Prompt for master key
+    // Master password prompt
     final masterInput = await showDialog<String>(
       context: context,
       builder: (ctx) {
@@ -88,18 +103,30 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
     }
 
     try {
+      // Update password in Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_adminDocId)
           .update({'password': newPwd});
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset successfully!')),
-      );
+      // Simulate login by verifying credentials
+      final snap = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_adminDocId)
+          .get();
 
+      final userData = snap.data();
+      if (userData == null || userData['password'] != newPwd) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed after password reset.')),
+        );
+        return;
+      }
+
+      // Navigate to Admin Dashboard
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const AdminLogin()),
+        MaterialPageRoute(builder: (_) => const AdminDashboard()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -152,7 +179,7 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _resetPassword,
-                child: const Text('Reset & Go to Login'),
+                child: const Text('Reset & Go to Dashboard'),
               ),
             ],
           ],

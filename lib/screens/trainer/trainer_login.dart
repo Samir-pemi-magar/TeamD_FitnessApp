@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'trainer_dashboard.dart';
+import 'trainer_forget_password.dart'; // <-- Add this import
 
 class TrainerLogin extends StatefulWidget {
   const TrainerLogin({super.key});
@@ -110,6 +111,18 @@ class _TrainerLoginState extends State<TrainerLogin> {
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   child: const Text("Login"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TrainerForgotPasswordScreen()),
+                    );
+                  },
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),

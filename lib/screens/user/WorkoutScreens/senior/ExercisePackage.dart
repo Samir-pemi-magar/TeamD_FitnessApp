@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/ViewDietPlan.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExerciseDetails.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
@@ -160,6 +161,30 @@ class _ExercisePackageState extends State<ExercisePackage> {
           ),
         ),
         backgroundColor: Colors.green,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'Recipe') {
+                print("hello");
+              } else if (value == 'Diet Plan') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ViewDietPlan()),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'Recipe',
+                child: Text('Recipe'),
+              ),
+              PopupMenuItem<String>(
+                value: 'Diet Plan',
+                child: Text('Diet Plan'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -228,7 +253,6 @@ class _ExercisePackageState extends State<ExercisePackage> {
                                 SelectedExercise = package["title"];
                               });
 
-                              // Store selected exercise in Firestore
                               await FirebaseFirestore.instance
                                   .collection('selectedExercise')
                                   .doc('info')

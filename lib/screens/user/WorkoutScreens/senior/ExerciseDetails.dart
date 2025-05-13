@@ -18,10 +18,28 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int _selectedIndex = 0;
   bool hasError = false;
 
+  String? emailAddress;
+
   @override
   void initState() {
     super.initState();
     fetchSelectedExercise();
+    fetchEmailAddress();
+  }
+
+  Future<void> fetchEmailAddress() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('selectedUser')
+          .doc('Information')
+          .get();
+
+      if (userDoc.exists) {
+        emailAddress = userDoc['EmailAddress'];
+      }
+    } catch (e) {
+      print("Error fetching email address: $e");
+    }
   }
 
   Future<void> fetchSelectedExercise() async {
@@ -126,6 +144,33 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
     }
   }
 
+  Future<void> handleDoneButtonClick() async {
+    if (emailAddress == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Email not found.')),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('FitnessTracking')
+          .add({
+        'EmailAddress': emailAddress,
+        'TimeStamp': Timestamp.now(),
+        'CaloriesBurnt': 10, // Each click adds a new record of 10
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Calories recorded successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update calories.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,6 +234,17 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
                               ),
                               SizedBox(height: 8),
                               Text(exercise['detail'] ?? 'No description.'),
+                              SizedBox(height: 16),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: handleDoneButtonClick,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Color.fromARGB(255, 9, 188, 101),
+                                  ),
+                                  child: Text("Done"),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -221,7 +277,6 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
         backgroundColor: Color(0xFFF7E9AE),
-
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:fitnessapp/screens/common/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/services/auth_service.dart';
@@ -36,10 +37,7 @@ class _UserLoginState extends State<UserLogin> {
         await FirebaseFirestore.instance
             .collection('selectedUser')
             .doc('Information')
-            .set({
-          'EmailAddress': _emailController.text.trim(),
-          'Age': 18,
-        });
+            .set({'EmailAddress': _emailController.text.trim(), 'Age': 18});
 
         Navigator.pushReplacement(
           context,
@@ -48,13 +46,14 @@ class _UserLoginState extends State<UserLogin> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Login failed. Please check your credentials.')),
+            content: Text('Login failed. Please check your credentials.'),
+          ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error during login: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error during login: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -81,7 +80,12 @@ class _UserLoginState extends State<UserLogin> {
                 alignment: Alignment.topLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                    );
+                  },
                 ),
               ),
               Expanded(
@@ -134,8 +138,7 @@ class _UserLoginState extends State<UserLogin> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      const ForgotPasswordScreen(),
+                                  builder: (_) => const ForgotPasswordScreen(),
                                 ),
                               );
                             },
@@ -151,28 +154,35 @@ class _UserLoginState extends State<UserLogin> {
                         const SizedBox(height: 10),
                         _isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
+                              color: Colors.white,
+                            )
                             : ElevatedButton(
-                                onPressed: _login,
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 30, vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  backgroundColor: const Color.fromARGB(
-                                      255, 128, 202, 138),
+                              onPressed: _login,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 30,
+                                  vertical: 12,
                                 ),
-                                child: const Text('Log In'),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  128,
+                                  202,
+                                  138,
+                                ),
                               ),
+                              child: const Text('Log In'),
+                            ),
                         const SizedBox(height: 15),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const UserSignup()),
+                                builder: (_) => const UserSignup(),
+                              ),
                             );
                           },
                           child: const Text(

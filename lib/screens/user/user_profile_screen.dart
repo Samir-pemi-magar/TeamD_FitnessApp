@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/UserProfileEdit.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/graph.dart';
 import 'package:flutter/material.dart';
-// import 'package:fitnessapp/screens/user/EditProfileScreen.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:fitnessapp/screens/user/user_login.dart';
 import 'package:fitnessapp/screens/user/user_update_password.dart';
@@ -111,7 +112,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         );
         break;
       case 3:
-        // Already on profile screen
         break;
     }
   }
@@ -155,10 +155,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
-            backgroundColor: Colors.green, // Matches the example screenshot
+            backgroundColor: Colors.green,
             elevation: 0,
             title: Text(
-              'Available Packages', // Updated title as per screenshot
+              'User Profile',
               style: TextStyle(color: Colors.black),
             ),
             leading: IconButton(
@@ -197,8 +197,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       backgroundImage: imagePath != null
                           ? (imagePath.startsWith('http')
                               ? NetworkImage(imagePath)
-                              : AssetImage(imagePath)
-                                  as ImageProvider<Object>)
+                              : AssetImage(imagePath) as ImageProvider<Object>)
                           : AssetImage('assets/images/default_user.png'),
                     ),
                     SizedBox(height: 10),
@@ -212,7 +211,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Packages(),
+                            builder: (context) => UserProfileEdit(),
                           ),
                         );
                       },
@@ -243,24 +242,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 20),
-                      height: 180,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Fitness graph',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: 10),
+                    WaterIntakeGraph(emailAddress: userEmail!),
                     SizedBox(height: 20),
                   ],
                 ),

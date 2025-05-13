@@ -17,7 +17,6 @@ class _TrainerExerciseEditorState extends State<TrainerExerciseEditor> {
   String packageName = '';
   String ageRangeLabel = '';
   List<QueryDocumentSnapshot> fetchedDocs = [];
-  int _selectedIndex = 0;
 
   final TextEditingController ageController = TextEditingController();
   final TextEditingController packageController = TextEditingController();
@@ -32,36 +31,6 @@ class _TrainerExerciseEditorState extends State<TrainerExerciseEditor> {
     } else {
       ageRangeLabel = "Seniors (40+)";
       return '(40+)';
-    }
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => TrainerDashboard()),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => WaterIntake()),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Packages()),
-        );
-        break;
-      case 3:
-        print("Profile screen not made yet");
-        break;
     }
   }
 
@@ -152,10 +121,7 @@ class _TrainerExerciseEditorState extends State<TrainerExerciseEditor> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TrainerDashboard()),
-            );
+            Navigator.pop(context);
           },
         ),
       ),
@@ -255,32 +221,6 @@ class _TrainerExerciseEditorState extends State<TrainerExerciseEditor> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.house),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.droplet),
-            label: 'Water Intake',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.box),
-            label: 'Packages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.user),
-            label: 'Profile',
-          ),
-        ],
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Colors.black,
-        backgroundColor: Color.fromARGB(255, 84, 86, 82),
       ),
     );
   }

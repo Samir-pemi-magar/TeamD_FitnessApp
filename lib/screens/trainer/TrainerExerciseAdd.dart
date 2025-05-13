@@ -22,7 +22,6 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _packageController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  int _selectedIndex = 0;
 
   void AddToDatabase() {
     if (_formKey.currentState!.validate()) {
@@ -73,36 +72,6 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
     }
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => TrainerExerciseManager()),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => WaterIntake()),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Packages()),
-        );
-        break;
-      case 3:
-        print("Profile screen not made yet");
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -119,10 +88,7 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => WaterIntake()),
-            );
+            Navigator.pop(context);
           },
         ),
         actions: [
@@ -318,32 +284,7 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.house),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.droplet),
-            label: 'Water Intake',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.box),
-            label: 'Packages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.user),
-            label: 'Profile',
-          ),
-        ],
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Colors.black,
-        backgroundColor: Color.fromARGB(255, 84, 86, 82),
-      ),
+      
     );
   }
 }

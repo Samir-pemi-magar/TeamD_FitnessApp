@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -49,6 +50,10 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
         );
         break;
       case 3:
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+        );
         break;
     }
   }

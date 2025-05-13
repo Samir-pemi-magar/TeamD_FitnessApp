@@ -1,57 +1,66 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'trainer_login.dart'; 
+import 'trainer_login.dart';
 
 class TrainerForgotPasswordScreen extends StatefulWidget {
   const TrainerForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  _TrainerForgotPasswordScreenState createState() => _TrainerForgotPasswordScreenState();
+  _TrainerForgotPasswordScreenState createState() =>
+      _TrainerForgotPasswordScreenState();
 }
 
-class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScreen> {
+class _TrainerForgotPasswordScreenState
+    extends State<TrainerForgotPasswordScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _phoneVerified = false;
   String? _trainerDocId;
-  String? _verifiedRole;
 
   Future<void> _verifyPhoneNumber() async {
     final phone = _phoneController.text.trim();
-    if (phone.isEmpty) return;
+
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a phone number.')),
+      );
+      return;
+    }
 
     try {
-      final snap = await FirebaseFirestore.instance
+      final snapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('phoneNumber', isEqualTo: phone)
           .limit(1)
           .get();
 
-      if (snap.docs.isEmpty) {
+      if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Phone number not found.')),
         );
         return;
       }
 
-      final userData = snap.docs.first.data();
+      final userDoc = snapshot.docs.first;
+      final userData = userDoc.data();
+
       if (userData['role'] != 'trainer') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This reset is for trainers only.')),
+          const SnackBar(content: Text('This reset is only for trainers.')),
         );
         return;
       }
 
       setState(() {
         _phoneVerified = true;
-        _trainerDocId = snap.docs.first.id;
-        _verifiedRole = userData['role'];
+        _trainerDocId = userDoc.id;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying phone: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }
@@ -60,6 +69,13 @@ class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScree
     final newPwd = _newPasswordController.text.trim();
     final confirmPwd = _confirmPasswordController.text.trim();
 
+    if (newPwd.isEmpty || confirmPwd.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields.')),
+      );
+      return;
+    }
+
     if (newPwd != confirmPwd) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match.')),
@@ -67,26 +83,21 @@ class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScree
       return;
     }
 
-    if (_trainerDocId == null || _verifiedRole != 'trainer') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unauthorized access.')),
-      );
-      return;
-    }
+    // Ask for master key
     final masterInput = await showDialog<String>(
       context: context,
       builder: (ctx) {
-        final ctl = TextEditingController();
+        final TextEditingController masterController = TextEditingController();
         return AlertDialog(
           title: const Text('Enter Master Password'),
           content: TextField(
-            controller: ctl,
+            controller: masterController,
             obscureText: true,
             decoration: const InputDecoration(labelText: 'Master Password'),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, ctl.text),
+              onPressed: () => Navigator.pop(ctx, masterController.text),
               child: const Text('Confirm'),
             ),
           ],
@@ -105,7 +116,7 @@ class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScree
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_trainerDocId)
-          .update({'password': newPwd}); 
+          .update({'password': newPwd});
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password reset successfully!')),
@@ -158,6 +169,7 @@ class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScree
                   TextField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
+                    enabled: !_phoneVerified,
                     decoration: const InputDecoration(
                       labelText: 'Registered Phone Number',
                       border: OutlineInputBorder(),
@@ -169,6 +181,9 @@ class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScree
                   if (!_phoneVerified)
                     ElevatedButton(
                       onPressed: _verifyPhoneNumber,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
                       child: const Text('Verify Phone Number'),
                     )
                   else ...[
@@ -196,6 +211,9 @@ class _TrainerForgotPasswordScreenState extends State<TrainerForgotPasswordScree
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _resetPassword,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
                       child: const Text('Reset & Go to Login'),
                     ),
                   ],

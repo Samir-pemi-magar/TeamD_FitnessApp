@@ -164,10 +164,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios, color: Colors.black),
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserDashboard()),
-                );
+                Navigator.pop(context);
               },
             ),
             actions: [

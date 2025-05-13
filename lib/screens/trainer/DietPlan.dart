@@ -26,7 +26,6 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
     'age': '',
     'goal': '',
   };
-  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -64,24 +63,6 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
           .showSnackBar(SnackBar(content: Text('Error loading data')));
     }
   }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    final pages = [
-      UserDashboard(),
-      WaterIntake(),
-      Packages(),
-      UserProfileScreen(),
-    ];
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => pages[index]),
-    );
-  }
-
   List<FlSpot> getWeightSpots() {
     return List.generate(weightData.length, (index) {
       return FlSpot(
@@ -135,32 +116,7 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.house),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.droplet),
-            label: 'Water Intake',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.box),
-            label: 'Packages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.user),
-            label: 'Profile',
-          ),
-        ],
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Colors.black,
-        backgroundColor: Color(0xFFF7E9AE),
-      ),
+      
     );
   }
 

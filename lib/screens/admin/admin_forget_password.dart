@@ -6,13 +6,15 @@ class AdminForgotPasswordScreen extends StatefulWidget {
   const AdminForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  _AdminForgotPasswordScreenState createState() => _AdminForgotPasswordScreenState();
+  _AdminForgotPasswordScreenState createState() =>
+      _AdminForgotPasswordScreenState();
 }
 
 class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _phoneVerified = false;
   String? _adminDocId;
@@ -73,7 +75,6 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
       return;
     }
 
-    // Master password prompt
     final masterInput = await showDialog<String>(
       context: context,
       builder: (ctx) {
@@ -103,13 +104,11 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
     }
 
     try {
-      // Update password in Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_adminDocId)
           .update({'password': newPwd});
 
-      // Simulate login by verifying credentials
       final snap = await FirebaseFirestore.instance
           .collection('users')
           .doc(_adminDocId)
@@ -123,7 +122,6 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
         return;
       }
 
-      // Navigate to Admin Dashboard
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const AdminDashboard()),
@@ -138,52 +136,112 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Forgot Password')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            TextField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Registered Phone Number',
-                border: OutlineInputBorder(),
+      body: Stack(
+        children: [
+          // Background image (optional)
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/background.png"),
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 20),
-            if (!_phoneVerified)
-              ElevatedButton(
-                onPressed: _verifyPhoneNumber,
-                child: const Text('Verify Phone Number'),
-              )
-            else ...[
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'New Password',
-                  border: OutlineInputBorder(),
+          ),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Verify it\'s you',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      enabled: !_phoneVerified,
+                      decoration: InputDecoration(
+                        hintText: 'Enter phone number',
+                        filled: true,
+                        fillColor: _phoneVerified
+                            ? Colors.grey[300]
+                            : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (!_phoneVerified)
+                      ElevatedButton(
+                        onPressed: _verifyPhoneNumber,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        child: const Text(
+                          'Verify',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    else ...[
+                      TextField(
+                        controller: _newPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Create a password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Retype the password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _resetPassword,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Reset & Login',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _resetPassword,
-                child: const Text('Reset & Go to Dashboard'),
-              ),
-            ],
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }

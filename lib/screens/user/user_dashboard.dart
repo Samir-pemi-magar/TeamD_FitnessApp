@@ -86,11 +86,24 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   void getCaloriesData() async {
+    if (emailAddress == null) {
+      print("EmailAddress is not loaded yet.");
+      return;
+    }
+
     try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('CaloriesDataset').get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('FitnessTracking')
+          .where('EmailAddress', isEqualTo: emailAddress)
+          .get();
+
+      double totalCalories = snapshot.docs.fold(
+          0.0,
+          (sum, doc) =>
+              sum + (doc.data() as Map<String, dynamic>)['CaloriesBurnt']);
+
       setState(() {
-        calories = snapshot.docs.map((doc) => doc.data()).toList();
+        calories = [{'Calories': totalCalories}];
       });
     } catch (e) {
       print("Error fetching calories data: $e");

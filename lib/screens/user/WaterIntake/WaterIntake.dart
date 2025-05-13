@@ -13,7 +13,14 @@ class WaterIntake extends StatefulWidget {
 class _WaterIntakeState extends State<WaterIntake> {
   int _selectedIndex = 1;
   int waterIntake = 0;
+  dynamic emailAddress;
   final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _readEmailAddress();
+  }
 
   void _addWater(int amount) {
     setState(() {
@@ -29,14 +36,77 @@ class _WaterIntakeState extends State<WaterIntake> {
     }
   }
 
-  void _saveIntake() {
-    FirebaseFirestore.instance
-        .collection('WaterIntakeDatabase')
-        .doc('WaterIntake')
-        .set({
-      'waterintake': waterIntake,
-    }, SetOptions(merge: true));
+  Future<void> _readEmailAddress() async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('selectedUser')
+          .doc('Information')
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          emailAddress = doc.get('EmailAddress');
+        });
+      } else {
+        print("Document does not exist.");
+      }
+    } catch (e) {
+      print("Error fetching email address: $e");
+    }
   }
+
+  void _saveIntake() async {
+    if (emailAddress == null) {
+      print("EmailAddress is not loaded yet.");
+      return;
+    }
+
+    DateTime today = DateTime.now();
+    String todayDateOnly = "${today.year}-${today.month}-${today.day}";
+
+    try {
+      QuerySnapshot existingEntries = await FirebaseFirestore.instance
+          .collection('WaterIntakeDatabase')
+          .where('EmailAddress', isEqualTo: emailAddress)
+          .get();
+
+      DocumentSnapshot? existingDoc;
+      for (var doc in existingEntries.docs) {
+        Timestamp timestamp = doc['timestamp'];
+        DateTime docDate = timestamp.toDate();
+        String docDateOnly = "${docDate.year}-${docDate.month}-${docDate.day}";
+
+        if (docDateOnly == todayDateOnly) {
+          existingDoc = doc;
+          break;
+        }
+      }
+
+      if (existingDoc != null) {
+        int existingIntake = existingDoc['WaterIntake'];
+        await FirebaseFirestore.instance
+            .collection('WaterIntakeDatabase')
+            .doc(existingDoc.id)
+            .update({
+          'WaterIntake': existingIntake + waterIntake,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      } else {
+        await FirebaseFirestore.instance.collection('WaterIntakeDatabase').add({
+          'EmailAddress': emailAddress,
+          'WaterIntake': waterIntake,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Water intake saved successfully!')),
+      );
+    } catch (e) {
+      print("Error saving intake: $e");
+    }
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -70,7 +140,6 @@ class _WaterIntakeState extends State<WaterIntake> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,16 +159,14 @@ class _WaterIntakeState extends State<WaterIntake> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Background
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/background.png'), // Your background
+                  image: AssetImage('assets/images/background.png'),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-            // Foreground
             SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
@@ -107,9 +174,9 @@ class _WaterIntakeState extends State<WaterIntake> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 20),
-                    Text(
+                    const Text(
                       "Your Daily Goal : 2,500 ml",
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 30),
                     Container(
@@ -210,7 +277,6 @@ class _WaterIntakeState extends State<WaterIntake> {
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
         backgroundColor: Color(0xFFF7E9AE),
-
       ),
     );
   }

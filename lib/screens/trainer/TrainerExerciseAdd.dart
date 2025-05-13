@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitnessapp/screens/trainer/DietPlan.dart';
+import 'package:fitnessapp/screens/trainer/editexercise.dart';
 import 'package:fitnessapp/screens/trainer/trainer_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,31 +41,35 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
         collectionName = '(40+)';
       }
 
-      FirebaseFirestore.instance.collection(collectionName).add({
-        "title": title,
-        "detail": detail,
-        "imagePath": imagePath,
-        "package": package,
-      }).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Exercise added successfully."),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _titleController.clear();
-        _detailController.clear();
-        _imagePathController.clear();
-        _ageController.clear();
-        _packageController.clear();
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to add exercise: $error"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      });
+      FirebaseFirestore.instance
+          .collection(collectionName)
+          .add({
+            "title": title,
+            "detail": detail,
+            "imagePath": imagePath,
+            "package": package,
+          })
+          .then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Exercise added successfully."),
+                backgroundColor: Colors.green,
+              ),
+            );
+            _titleController.clear();
+            _detailController.clear();
+            _imagePathController.clear();
+            _ageController.clear();
+            _packageController.clear();
+          })
+          .catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Failed to add exercise: $error"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          });
     }
   }
 
@@ -119,7 +125,42 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
             );
           },
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'edit') {
+                Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TrainerExerciseEditor()),
+            );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Edit clicked")));
+              } else if (value == 'diet') {
+                Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => WeightAndMealTracker()),
+            );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Diet Plan clicked")));
+              } else if (value == 'recipe') {
+                print("not made yet");
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Recipe clicked")));
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  PopupMenuItem(value: 'diet', child: Text('Diet Plan')),
+                  PopupMenuItem(value: 'recipe', child: Text('Recipe')),
+                ],
+          ),
+        ],
       ),
+
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -150,11 +191,21 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Title", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(
+                        "Title",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       SizedBox(height: 6),
                       TextFormField(
                         controller: _titleController,
-                        validator: (value) => value == null || value.isEmpty ? "Title is required" : null,
+                        validator:
+                            (value) =>
+                                value == null || value.isEmpty
+                                    ? "Title is required"
+                                    : null,
                         decoration: InputDecoration(
                           hintText: "Enter exercise title",
                           contentPadding: EdgeInsets.all(10),
@@ -162,11 +213,21 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text("Image File Path", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(
+                        "Image File Path",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       SizedBox(height: 6),
                       TextFormField(
                         controller: _imagePathController,
-                        validator: (value) => value == null || value.isEmpty ? "Image path is required" : null,
+                        validator:
+                            (value) =>
+                                value == null || value.isEmpty
+                                    ? "Image path is required"
+                                    : null,
                         decoration: InputDecoration(
                           hintText: "Enter image file path",
                           contentPadding: EdgeInsets.all(10),
@@ -174,15 +235,23 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text("Age", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(
+                        "Age",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       SizedBox(height: 6),
                       TextFormField(
                         controller: _ageController,
                         keyboardType: TextInputType.number,
                         validator: (value) {
-                          if (value == null || value.isEmpty) return "Age is required";
+                          if (value == null || value.isEmpty)
+                            return "Age is required";
                           final age = int.tryParse(value);
-                          if (age == null || age < 15) return "Enter a valid age (15+)";
+                          if (age == null || age < 15)
+                            return "Enter a valid age (15+)";
                           return null;
                         },
                         decoration: InputDecoration(
@@ -192,11 +261,21 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text("Package", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(
+                        "Package",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       SizedBox(height: 6),
                       TextFormField(
                         controller: _packageController,
-                        validator: (value) => value == null || value.isEmpty ? "Package is required" : null,
+                        validator:
+                            (value) =>
+                                value == null || value.isEmpty
+                                    ? "Package is required"
+                                    : null,
                         decoration: InputDecoration(
                           hintText: "Enter package name",
                           contentPadding: EdgeInsets.all(10),
@@ -204,12 +283,22 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text("Exercise Detail", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(
+                        "Exercise Detail",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       SizedBox(height: 6),
                       TextFormField(
                         controller: _detailController,
                         maxLines: 5,
-                        validator: (value) => value == null || value.isEmpty ? "Details are required" : null,
+                        validator:
+                            (value) =>
+                                value == null || value.isEmpty
+                                    ? "Details are required"
+                                    : null,
                         decoration: InputDecoration(
                           hintText: "Enter exercise details",
                           contentPadding: EdgeInsets.all(10),

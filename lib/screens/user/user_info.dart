@@ -3,11 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// TEEN SCREENS
-import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_weight_loss.dart';
-import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_weight_loss_3m.dart';
-import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_muscle_building.dart';
-import 'package:fitnessapp/screens/user/WorkoutScreens/teens/teen_muscle_building_3m.dart';
 
 // ADULT SCREENS
 import 'package:fitnessapp/screens/user/WorkoutScreens/adult/adult_weight_loss.dart';
@@ -28,19 +23,6 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 final Map<String, Widget Function()> workoutScreenRoutes = {
-  // Teen
-  'teen|Weight Loss Package (1 Month)': () => TeenWeightLossScreen(),
-  'teen|Weight Loss Package (3 Months)': () => TeenWeightLoss3MonthScreen(),
-  'teen|Muscle Building Package (1 Month)': () => TeenMuscleBuildingScreen(),
-  'teen|Muscle Building Package (3 Months)':
-      () => TeenMuscleBuilding3MonthScreen(),
-
-  // Adult
-  'adult|Weight Loss Package (1 Month)': () => AdultWeightLossScreen(),
-  'adult|Weight Loss Package (3 Months)': () => AdultWeightLoss3MonthScreen(),
-  'adult|Muscle Building Package (1 Month)': () => AdultMuscleBuildingScreen(),
-  'adult|Muscle Building Package (3 Months)':
-      () => AdultMuscleBuilding3MonthScreen(),
 
   // Senior
   'senior|Weight Loss Package (1 Month)': () => SeniorWeightLossScreen(),

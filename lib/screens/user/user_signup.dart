@@ -24,6 +24,18 @@ class _UserSignupState extends State<UserSignup> {
     });
   }
 
+  bool _isValidName(String name) {
+    // Validate name to ensure it does not contain numbers
+    final nameRegExp = RegExp(r'^[a-zA-Z\s]+$');
+    return nameRegExp.hasMatch(name);
+  }
+
+  bool _isValidPhoneNumber(String phone) {
+    // Validate phone number (e.g., simple check for 10 digits)
+    final phoneRegExp = RegExp(r'^\d{10}$');
+    return phoneRegExp.hasMatch(phone);
+  }
+
   void _signUp() async {
     setState(() {
       _isLoading = true;
@@ -33,6 +45,16 @@ class _UserSignupState extends State<UserSignup> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
     final String phone = _phoneController.text.trim();
+
+    if (!_isValidName(name)) {
+      _showError("Please enter a valid name (only letters allowed).");
+      return;
+    }
+
+    if (!_isValidPhoneNumber(phone)) {
+      _showError("Please enter a valid phone number (10 digits required).");
+      return;
+    }
 
     try {
       final usersRef = FirebaseFirestore.instance.collection('users');

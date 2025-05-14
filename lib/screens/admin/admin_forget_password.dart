@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'admin_dashboard.dart';
+import '../admin/admin_dashboard.dart';
 
 class AdminForgotPasswordScreen extends StatefulWidget {
   const AdminForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  _AdminForgotPasswordScreenState createState() =>
+  State<AdminForgotPasswordScreen> createState() =>
       _AdminForgotPasswordScreenState();
 }
 
-class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
+class _AdminForgotPasswordScreenState
+    extends State<AdminForgotPasswordScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -18,42 +19,41 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
 
   bool _phoneVerified = false;
   String? _adminDocId;
-  String? _verifiedRole;
 
   Future<void> _verifyPhoneNumber() async {
     final phone = _phoneController.text.trim();
-    if (phone.isEmpty) return;
+
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a phone number.')),
+      );
+      return;
+    }
 
     try {
-      final snap = await FirebaseFirestore.instance
+      final snapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('phoneNumber', isEqualTo: phone)
+          .where('role', isEqualTo: 'admin')
           .limit(1)
           .get();
 
-      if (snap.docs.isEmpty) {
+      if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Phone number not found.')),
+          const SnackBar(content: Text('Admin phone number not found.')),
         );
         return;
       }
 
-      final userData = snap.docs.first.data();
-      if (userData['role'] != 'admin') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This password reset is for admins only.')),
-        );
-        return;
-      }
+      final userDoc = snapshot.docs.first;
 
       setState(() {
         _phoneVerified = true;
-        _adminDocId = snap.docs.first.id;
-        _verifiedRole = userData['role'];
+        _adminDocId = userDoc.id;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying phone: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }
@@ -62,15 +62,16 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
     final newPwd = _newPasswordController.text.trim();
     final confirmPwd = _confirmPasswordController.text.trim();
 
-    if (newPwd != confirmPwd) {
+    if (newPwd.isEmpty || confirmPwd.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
+        const SnackBar(content: Text('Please fill in all fields.')),
       );
       return;
     }
-    if (_adminDocId == null || _verifiedRole != 'admin') {
+
+    if (newPwd != confirmPwd) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unauthorized access.')),
+        const SnackBar(content: Text('Passwords do not match.')),
       );
       return;
     }
@@ -78,17 +79,17 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
     final masterInput = await showDialog<String>(
       context: context,
       builder: (ctx) {
-        final ctl = TextEditingController();
+        final TextEditingController masterController = TextEditingController();
         return AlertDialog(
           title: const Text('Enter Master Password'),
           content: TextField(
-            controller: ctl,
+            controller: masterController,
             obscureText: true,
             decoration: const InputDecoration(labelText: 'Master Password'),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, ctl.text),
+              onPressed: () => Navigator.pop(ctx, masterController.text),
               child: const Text('Confirm'),
             ),
           ],
@@ -96,7 +97,7 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
       },
     );
 
-    if (masterInput != 'master123') {
+    if (masterInput != 'admin123') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Incorrect master password.')),
       );
@@ -109,18 +110,9 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
           .doc(_adminDocId)
           .update({'password': newPwd});
 
-      final snap = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_adminDocId)
-          .get();
-
-      final userData = snap.data();
-      if (userData == null || userData['password'] != newPwd) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login failed after password reset.')),
-        );
-        return;
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset successfully!')),
+      );
 
       Navigator.pushReplacement(
         context,
@@ -138,7 +130,6 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image (optional)
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -161,10 +152,7 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
                     const SizedBox(height: 10),
                     const Text(
                       'Verify it\'s you',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -174,9 +162,7 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter phone number',
                         filled: true,
-                        fillColor: _phoneVerified
-                            ? Colors.grey[300]
-                            : Colors.white,
+                        fillColor: _phoneVerified ? Colors.grey[300] : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -189,10 +175,7 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                         ),
-                        child: const Text(
-                          'Verify',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: const Text('Verify', style: TextStyle(color: Colors.white)),
                       )
                     else ...[
                       TextField(
@@ -230,14 +213,20 @@ class _AdminForgotPasswordScreenState extends State<AdminForgotPasswordScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
-                          'Reset & Login',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: const Text('Reset & Login', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ],
                 ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ),

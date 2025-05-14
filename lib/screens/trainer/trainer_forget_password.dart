@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'trainer_login.dart';
+import 'package:fitnessapp/screens/trainer/trainer_dashboard.dart';
 
 class TrainerForgotPasswordScreen extends StatefulWidget {
   const TrainerForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  _TrainerForgotPasswordScreenState createState() =>
+  State<TrainerForgotPasswordScreen> createState() =>
       _TrainerForgotPasswordScreenState();
 }
 
@@ -34,25 +34,18 @@ class _TrainerForgotPasswordScreenState
       final snapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('phoneNumber', isEqualTo: phone)
+          .where('role', isEqualTo: 'trainer')
           .limit(1)
           .get();
 
       if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Phone number not found.')),
+          const SnackBar(content: Text('Trainer phone number not found.')),
         );
         return;
       }
 
       final userDoc = snapshot.docs.first;
-      final userData = userDoc.data();
-
-      if (userData['role'] != 'trainer') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This reset is only for trainers.')),
-        );
-        return;
-      }
 
       setState(() {
         _phoneVerified = true;
@@ -83,7 +76,6 @@ class _TrainerForgotPasswordScreenState
       return;
     }
 
-    // Ask for master key
     final masterInput = await showDialog<String>(
       context: context,
       builder: (ctx) {
@@ -124,7 +116,7 @@ class _TrainerForgotPasswordScreenState
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const TrainerLogin()),
+        MaterialPageRoute(builder: (_) => const TrainerDashboard()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,86 +130,103 @@ class _TrainerForgotPasswordScreenState
     return Scaffold(
       body: Stack(
         children: [
-          Image.asset(
-            'assets/images/background.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/background.png"),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                  const SizedBox(height: 30),
-                  const Center(
-                    child: Text(
-                      'Trainer Forgot Password',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Verify it\'s you',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    enabled: !_phoneVerified,
-                    decoration: const InputDecoration(
-                      labelText: 'Registered Phone Number',
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  if (!_phoneVerified)
-                    ElevatedButton(
-                      onPressed: _verifyPhoneNumber,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                      ),
-                      child: const Text('Verify Phone Number'),
-                    )
-                  else ...[
+                    const SizedBox(height: 20),
                     TextField(
-                      controller: _newPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'New Password',
-                        border: OutlineInputBorder(),
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      enabled: !_phoneVerified,
+                      decoration: InputDecoration(
+                        hintText: 'Enter phone number',
                         filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _confirmPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Confirm Password',
-                        border: OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.white,
+                        fillColor: _phoneVerified ? Colors.grey[300] : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _resetPassword,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                    if (!_phoneVerified)
+                      ElevatedButton(
+                        onPressed: _verifyPhoneNumber,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        child: const Text('Verify', style: TextStyle(color: Colors.white)),
+                      )
+                    else ...[
+                      TextField(
+                        controller: _newPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Create a password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                       ),
-                      child: const Text('Reset & Go to Login'),
-                    ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Retype the password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _resetPassword,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Reset & Login', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
                   ],
-                ],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ),

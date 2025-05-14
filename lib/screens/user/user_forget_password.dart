@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_dashboard.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -24,6 +24,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       final userSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('phoneNumber', isEqualTo: phone)
+          .where('role', isEqualTo: 'user')
           .limit(1)
           .get();
 
@@ -34,7 +35,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Phone number not found.')),
+          const SnackBar(content: Text('Phone number not found for a user.')),
         );
       }
     } catch (e) {
@@ -48,6 +49,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields.')),
+      );
+      return;
+    }
+
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match.')),
@@ -55,7 +63,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    // Prompt for master password
     String? masterInput = await showDialog<String>(
       context: context,
       builder: (context) {
@@ -88,6 +95,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: _userEmail)
+          .where('role', isEqualTo: 'user')
           .get();
 
       if (userDoc.docs.isNotEmpty) {
@@ -117,7 +125,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Optional background image or gradient
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -140,10 +147,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(height: 10),
                     const Text(
                       'Verify it\'s you',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -153,8 +157,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter phone number',
                         filled: true,
-                        fillColor:
-                            _phoneVerified ? Colors.grey[300] : Colors.white,
+                        fillColor: _phoneVerified ? Colors.grey[300] : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -167,10 +170,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                         ),
-                        child: const Text(
-                          'Verify',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: const Text('Verify', style: TextStyle(color: Colors.white)),
                       )
                     else ...[
                       TextField(
@@ -208,10 +208,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
-                          'Reset & Login',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: const Text('Reset & Login', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ],

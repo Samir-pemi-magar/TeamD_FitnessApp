@@ -206,7 +206,7 @@ class _UserDashboardState extends State<UserDashboard> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Calories aim:"),
+                                Text("Calories Burnt:"),
                                 Text(
                                   calories.isNotEmpty
                                       ? (calories.first['Calories']?.toString() ?? "0") + " cal"

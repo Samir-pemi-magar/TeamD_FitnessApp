@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/WaterIntakeGraph.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,10 +39,11 @@ class _WaterIntakeState extends State<WaterIntake> {
 
   Future<void> _readEmailAddress() async {
     try {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('selectedUser')
-          .doc('Information')
-          .get();
+      DocumentSnapshot doc =
+          await FirebaseFirestore.instance
+              .collection('selectedUser')
+              .doc('Information')
+              .get();
 
       if (doc.exists) {
         setState(() {
@@ -65,10 +67,11 @@ class _WaterIntakeState extends State<WaterIntake> {
     String todayDateOnly = "${today.year}-${today.month}-${today.day}";
 
     try {
-      QuerySnapshot existingEntries = await FirebaseFirestore.instance
-          .collection('WaterIntakeDatabase')
-          .where('EmailAddress', isEqualTo: emailAddress)
-          .get();
+      QuerySnapshot existingEntries =
+          await FirebaseFirestore.instance
+              .collection('WaterIntakeDatabase')
+              .where('EmailAddress', isEqualTo: emailAddress)
+              .get();
 
       DocumentSnapshot? existingDoc;
       for (var doc in existingEntries.docs) {
@@ -88,9 +91,9 @@ class _WaterIntakeState extends State<WaterIntake> {
             .collection('WaterIntakeDatabase')
             .doc(existingDoc.id)
             .update({
-          'WaterIntake': existingIntake + waterIntake,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
+              'WaterIntake': existingIntake + waterIntake,
+              'timestamp': FieldValue.serverTimestamp(),
+            });
       } else {
         await FirebaseFirestore.instance.collection('WaterIntakeDatabase').add({
           'EmailAddress': emailAddress,
@@ -154,7 +157,7 @@ class _WaterIntakeState extends State<WaterIntake> {
           },
         ),
         title: const Text('Water Intake'),
-        backgroundColor: Colors.green,
+        backgroundColor:Color(0xFFF7E9AE),
       ),
       body: SafeArea(
         child: Stack(
@@ -169,14 +172,20 @@ class _WaterIntakeState extends State<WaterIntake> {
             ),
             SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 20),
                     const Text(
                       "Your Daily Goal : 2,500 ml",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 30),
                     Container(
@@ -203,7 +212,10 @@ class _WaterIntakeState extends State<WaterIntake> {
                           const SizedBox(height: 10),
                           Text(
                             "$waterIntake ml",
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -225,9 +237,21 @@ class _WaterIntakeState extends State<WaterIntake> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildWaterButton(Icons.local_drink, "250 ml", () => _addWater(250)),
-                        _buildWaterButton(FontAwesomeIcons.bottleWater, "500 ml", () => _addWater(500)),
-                        _buildWaterButton(FontAwesomeIcons.plus, "Custom", _customAdd),
+                        _buildWaterButton(
+                          Icons.local_drink,
+                          "250 ml",
+                          () => _addWater(250),
+                        ),
+                        _buildWaterButton(
+                          FontAwesomeIcons.bottleWater,
+                          "500 ml",
+                          () => _addWater(500),
+                        ),
+                        _buildWaterButton(
+                          FontAwesomeIcons.plus,
+                          "Custom",
+                          _customAdd,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 40),
@@ -237,8 +261,42 @@ class _WaterIntakeState extends State<WaterIntake> {
                       label: const Text("Save Intake"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
-                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 50,
+                          vertical: 14,
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WaterIntakeGraph(),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.show_chart),
+                      label: Text("Graph"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 50,
+                          vertical: 14,
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -305,7 +363,10 @@ class _WaterIntakeState extends State<WaterIntake> {
             const SizedBox(height: 5),
             Text(
               label,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

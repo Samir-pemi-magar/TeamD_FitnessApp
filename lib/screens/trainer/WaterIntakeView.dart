@@ -1,35 +1,33 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class WaterIntakeGraph extends StatefulWidget {
-  final String emailAddress;
-  const WaterIntakeGraph({required this.emailAddress});
-
+class WaterIntakeScreen extends StatefulWidget {
   @override
-  _WaterIntakeGraphState createState() => _WaterIntakeGraphState();
+  _WaterIntakeScreenState createState() => _WaterIntakeScreenState();
 }
 
-class _WaterIntakeGraphState extends State<WaterIntakeGraph> {
-  Map<String, int> intakeData = {}; // Date -> WaterIntake
+class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  bool _showGraph = false;
+  bool _isLoading = false;
+  Map<String, int> intakeData = {}; // Date -> Intake
 
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
+  Future<void> fetchData(String email) async {
+    setState(() {
+      _isLoading = true;
+      intakeData.clear();
+    });
 
-  Future<void> fetchData() async {
     try {
       DateTime now = DateTime.now();
       DateTime startDate = now.subtract(Duration(days: 6));
 
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance
-              .collection('WaterIntakeDatabase')
-              .where('EmailAddress', isEqualTo: widget.emailAddress)
-              .get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('WaterIntakeDatabase')
+          .where('EmailAddress', isEqualTo: email)
+          .get();
 
       Map<String, int> tempData = {};
 
@@ -38,7 +36,7 @@ class _WaterIntakeGraphState extends State<WaterIntakeGraph> {
         DateTime date = timestamp.toDate();
 
         if (date.isAfter(startDate)) {
-          String dayLabel = DateFormat('EEE').format(date); // Mon, Tue, ...
+          String dayLabel = DateFormat('EEE').format(date); // Mon, Tue, etc.
           int waterIntake = int.tryParse(doc['WaterIntake'].toString()) ?? 0;
           tempData[dayLabel] = (tempData[dayLabel] ?? 0) + waterIntake;
         }
@@ -46,82 +44,167 @@ class _WaterIntakeGraphState extends State<WaterIntakeGraph> {
 
       setState(() {
         intakeData = tempData;
+        _isLoading = false;
+        _showGraph = true;
       });
     } catch (e) {
-      print("Error fetching graph data: $e");
+      print("Error fetching data: $e");
+      setState(() {
+        _isLoading = false;
+        _showGraph = false;
+      });
     }
+  }
+
+  List<String> getLast7Days() {
+    return List.generate(7, (index) {
+      DateTime sunday =
+          DateTime.now().subtract(Duration(days: DateTime.now().weekday % 7));
+      return DateFormat('EEE').format(sunday.add(Duration(days: index)));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<String> last7Days = List.generate(7, (index) {
-      DateTime sunday = DateTime.now().subtract(Duration(days: DateTime.now().weekday % 7));
-      DateTime date = sunday.add(Duration(days: index));
-      return DateFormat('EEE').format(date);
-    });
+    final last7Days = getLast7Days();
 
-    return Card(
-      margin: EdgeInsets.all(20),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              "Water Intake - Last 7 Days",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 1), // Add border
-                borderRadius: BorderRadius.circular(8), // Optional: rounded corners
-              ),
-              padding: EdgeInsets.all(8), // Add padding inside the border
-              child: SizedBox(
-                height: 200,
-                child: BarChart(
-                  BarChartData(
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(showTitles: false), // Disable left Y-axis titles
-                      ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, _) {
-                            int index = value.toInt();
-                            return Text(
-                              index >= 0 && index < last7Days.length
-                                  ? last7Days[index]
-                                  : '',
-                              style: TextStyle(fontSize: 12),
-                            );
-                          },
-                          reservedSize: 30,
-                        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Water Intake Tracker"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Fixed the error here
+          },
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: !_showGraph
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Enter your email:", style: TextStyle(fontSize: 16)),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: "example@email.com",
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
                     ),
-                    barGroups: List.generate(last7Days.length, (i) {
-                      final day = last7Days[i];
-                      final intake = intakeData[day] ?? 0;
-                      return BarChartGroupData(
-                        x: i,
-                        barRods: [
-                          BarChartRodData(
-                            toY: intake.toDouble(),
-                            color: Colors.green,
-                            width: 16,
-                            borderRadius: BorderRadius.circular(4),
+                    SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_emailController.text.trim().isNotEmpty) {
+                            fetchData(_emailController.text.trim());
+                          }
+                        },
+                        child: Text("Show Graph"),
+                      ),
+                    ),
+                  ],
+                )
+              : _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : intakeData.isEmpty
+                      ? Center(child: Text("No water intake data found."))
+                      : Center(
+                          // Center the graph and text content
+                          child: Card(
+                            color: Colors.white.withOpacity(0.88),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min, // Center the content
+                                children: [
+                                  Text(
+                                    "Water Intake - Last 7 Days",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 16),
+                                  SizedBox(
+                                    height: 200,
+                                    child: BarChart(
+                                      BarChartData(
+                                        borderData: FlBorderData(show: false),
+                                        titlesData: FlTitlesData(
+                                          leftTitles: AxisTitles(
+                                            sideTitles:
+                                                SideTitles(showTitles: false),
+                                          ),
+                                          bottomTitles: AxisTitles(
+                                            sideTitles: SideTitles(
+                                              showTitles: true,
+                                              reservedSize: 30,
+                                              getTitlesWidget: (value, _) {
+                                                int i = value.toInt();
+                                                return Text(
+                                                  i >= 0 &&
+                                                          i < last7Days.length
+                                                      ? last7Days[i]
+                                                      : '',
+                                                  style:
+                                                      TextStyle(fontSize: 12),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        barGroups: List.generate(7, (i) {
+                                          final day = last7Days[i];
+                                          final intake = intakeData[day] ?? 0;
+                                          return BarChartGroupData(
+                                            x: i,
+                                            barRods: [
+                                              BarChartRodData(
+                                                toY: intake.toDouble(),
+                                                color: Colors.blue,
+                                                width: 14,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                            ],
+                                          );
+                                        }),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _showGraph = false;
+                                        });
+                                      },
+                                      child: Text("Back"),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
-                      );
-                    }),
-                  ),
-                ),
-              ),
-            ),
-          ],
+                        ),
         ),
       ),
     );

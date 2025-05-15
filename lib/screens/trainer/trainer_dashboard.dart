@@ -105,6 +105,17 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                 ),
                 const SizedBox(height: 20),
                 MenuButton(
+                  text: 'Water Intake Graph',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => WaterIntakeScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                MenuButton(
                     text: 'Log out', onPressed: () => _logout(context)),
                 const Spacer(),
               ],

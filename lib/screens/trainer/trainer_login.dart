@@ -135,7 +135,7 @@ class _TrainerLoginState extends State<TrainerLogin> {
   Widget _buildTextField(TextEditingController controller, String label, String hint,
       {bool isPassword = false}) {
     return Container(
-      width: 280,
+      width: 350,
       child: TextField(
         controller: controller,
         obscureText: isPassword,

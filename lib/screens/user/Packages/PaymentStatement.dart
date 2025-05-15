@@ -2,6 +2,7 @@ import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/select_package.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
+import 'package:fitnessapp/screens/user/user_info.dart';
 import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -57,7 +58,6 @@ class _PaymentStatementState extends State<PaymentStatement> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +71,7 @@ class _PaymentStatementState extends State<PaymentStatement> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/background.png'), // Your background image
+                image: AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -97,47 +97,55 @@ class _PaymentStatementState extends State<PaymentStatement> {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Payment Statement",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    Center(
+                      child: Text(
+                        "Payment Statement",
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     const SizedBox(height: 20),
 
                     Text(
                       "Selected Package: ${widget.packageName}",
                       style: const TextStyle(fontSize: 18),
+                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: 10),
 
                     Text(
                       "Total Cost: NPR ${widget.packagePrice.toStringAsFixed(2)}",
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 18),
+                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: 10),
 
                     Text(
                       "Transaction Time: $currentTime",
                       style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: 30),
 
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                        textStyle: const TextStyle(fontSize: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          textStyle: const TextStyle(fontSize: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const UserInfoScreen()),
+                          );
+                        },
+                        child: const Text("Continue"),
                       ),
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => SelectPackageScreen()),
-                        );
-                      },
-                      child: const Text("Continue"),
                     ),
                   ],
                 ),
@@ -171,7 +179,6 @@ class _PaymentStatementState extends State<PaymentStatement> {
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
         backgroundColor: Color(0xFFF7E9AE),
-
       ),
     );
   }

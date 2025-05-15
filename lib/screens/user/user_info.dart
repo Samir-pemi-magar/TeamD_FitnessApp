@@ -1,8 +1,10 @@
+import 'package:fitnessapp/screens/user/Packages/packages.dart';
+import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
+import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 
 // ADULT SCREENS
 import 'package:fitnessapp/screens/user/WorkoutScreens/adult/adult_weight_loss.dart';
@@ -14,6 +16,7 @@ import 'package:fitnessapp/screens/user/WorkoutScreens/adult/adult_muscle_buildi
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_weight_loss.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_muscle_building.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/senior_muscle_building_3m.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({Key? key}) : super(key: key);
@@ -23,7 +26,6 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 final Map<String, Widget Function()> workoutScreenRoutes = {
-
   // Senior
   'senior|Weight Loss Package (1 Month)': () => SeniorWeightLossScreen(),
   'senior|Weight Loss Package (3 Months)': () => ExercisePackage(),
@@ -39,6 +41,38 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   int? age;
   double? height;
   double? weight;
+  int _selectedIndex = 3;
+
+  void _onItemTapped(int index) {
+    if (_selectedIndex == index) return;
+
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WaterIntake()),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Packages()),
+        );
+        break;
+      case 3:
+        break;
+    }
+  }
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
@@ -216,6 +250,32 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.house),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.droplet),
+            label: 'Water Intake',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.box),
+            label: 'Packages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.user),
+            label: 'Profile',
+          ),
+        ],
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.black,
+        backgroundColor: Color(0xFFF7E9AE),
       ),
     );
   }

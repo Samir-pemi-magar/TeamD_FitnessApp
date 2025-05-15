@@ -93,7 +93,7 @@ class _UserProfileEditState extends State<UserProfileEdit> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFFF7E9AE),
         title: Text("Edit Profile"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),

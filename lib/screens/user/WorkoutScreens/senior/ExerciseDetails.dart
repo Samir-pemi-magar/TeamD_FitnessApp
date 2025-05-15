@@ -1,5 +1,6 @@
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
+import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExercisePackage.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:fitnessapp/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -153,20 +154,53 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
     }
 
     try {
-      await FirebaseFirestore.instance
+      final querySnapshot = await FirebaseFirestore.instance
           .collection('FitnessTracking')
-          .add({
+          .where('EmailAddress', isEqualTo: emailAddress)
+          .limit(1)
+          .get();
+
+      final now = Timestamp.now();
+      final nowDate = DateTime(now.toDate().year, now.toDate().month, now.toDate().day);
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        final docTime = doc['TimeStamp'] as Timestamp;
+        final docDate = DateTime(docTime.toDate().year, docTime.toDate().month, docTime.toDate().day);
+
+        if (docDate == nowDate) {
+          // Same date: update existing document
+          final currentCalories = doc['CaloriesBurnt'] ?? 0;
+
+          await FirebaseFirestore.instance
+              .collection('FitnessTracking')
+              .doc(doc.id)
+              .update({
+            'CaloriesBurnt': currentCalories + 10,
+            'TimeStamp': now,
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Calories updated for today!')),
+          );
+          return;
+        }
+      }
+
+      // Different date or no existing doc: create a new document
+      await FirebaseFirestore.instance.collection('FitnessTracking').add({
         'EmailAddress': emailAddress,
-        'TimeStamp': Timestamp.now(),
-        'CaloriesBurnt': 10, // Each click adds a new record of 10
+        'CaloriesBurnt': 10,
+        'TimeStamp': now,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Calories recorded successfully!')),
+        SnackBar(content: Text('New calories record added for today!')),
       );
     } catch (e) {
+      print("Error handling calories: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update calories.')),
+        SnackBar(content: Text('Failed to update or create calories entry.')),
       );
     }
   }
@@ -175,13 +209,13 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 9, 188, 101),
+        backgroundColor: Color(0xFFF7E9AE),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Packages()),
+              MaterialPageRoute(builder: (context) => ExercisePackage()),
             );
           },
         ),

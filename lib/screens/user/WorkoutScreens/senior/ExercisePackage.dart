@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
 import 'package:fitnessapp/screens/user/ViewDietPlan.dart';
 import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
@@ -14,99 +15,54 @@ class ExercisePackage extends StatefulWidget {
 }
 
 class _ExercisePackageState extends State<ExercisePackage> {
-  List<Map<String, dynamic>> fetchedExercise = [];
-  String? SelectedExercise;
+  String? loggedInUser;
+  String? selectedPackage;
+  String? ageRangeLabel;
+  List<Map<String, dynamic>>? fetchedExercise;
   int _selectedIndex = 0;
-  String ageRangeLabel = "";
-  String? packageName;
 
   @override
   void initState() {
     super.initState();
-    getPackages();
-    checkAndFetchPackage();
-  }
-
-  Future<void> getPackages() async {
-    try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('selectedUser')
-          .doc('Information')
-          .get();
-
-      if (!userDoc.exists) {
-        print("User document does not exist.");
-        return;
-      }
-
-      int age = userDoc['Age'];
-      String collectionName;
-
-      if (age >= 15 && age <= 24) {
-        collectionName = '(15-24)';
-        ageRangeLabel = "Young Adults (15-24)";
-      } else if (age >= 25 && age <= 39) {
-        collectionName = '(25-39)';
-        ageRangeLabel = "Adults (25-39)";
-      } else {
-        collectionName = '(40+)';
-        ageRangeLabel = "Seniors (40+)";
-      }
-
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection(collectionName).get();
-
-      if (!mounted) return;
-      setState(() {
-        fetchedExercise = snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList();
-      });
-    } catch (e) {
-      print("Error fetching information: $e");
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      loggedInUser = user.email;
+      fetchSelectedPackage();
     }
   }
 
-  Future<void> checkAndFetchPackage() async {
+  Future<void> fetchSelectedPackage() async {
+    if (loggedInUser == null) return;
+
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('selectedUser')
-          .doc('Information')
+      print(loggedInUser);
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('selectedpackage')
+          .where('EmailAddress', isEqualTo: loggedInUser)
+          .limit(1)
           .get();
 
-      if (!userDoc.exists) {
-        print("User document does not exist.");
-        return;
-      }
-
-      String userEmail = userDoc['EmailAddress'];
-
-      QuerySnapshot packageSnapshot =
-          await FirebaseFirestore.instance.collection('selectedpackage').get();
-
-      for (var packageDoc in packageSnapshot.docs) {
-        Map<String, dynamic> packageData =
-            packageDoc.data() as Map<String, dynamic>;
-
-        if (packageData['EmailAddress'] == userEmail) {
-          packageName = packageData['packageName'];
-          print("Matched package name: $packageName");
-
-          if (mounted) {
-            setState(() {
-              SelectedExercise = packageName;
-            });
-          }
-          break;
-        }
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          selectedPackage = snapshot.docs.first.get('packageName');
+        });
+        await getPackages(); // Fetch exercises after package is selected
+      } else {
+        setState(() {
+          selectedPackage = 'No package selected';
+          fetchedExercise = null;
+        });
       }
     } catch (e) {
-      print("Error checking and fetching package: $e");
+      setState(() {
+        selectedPackage = 'Error loading package';
+        fetchedExercise = null;
+      });
+      print('Error fetching selected package: $e');
     }
   }
 
   void _onItemTapped(int index) {
-    if (!mounted) return;
     setState(() {
       _selectedIndex = index;
     });
@@ -139,156 +95,207 @@ class _ExercisePackageState extends State<ExercisePackage> {
     }
   }
 
+  Future<void> getPackages() async {
+    if (selectedPackage == null || loggedInUser == null) return;
+
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('selectedUser')
+          .doc('Information')
+          .get();
+
+      if (!userDoc.exists) {
+        print("User document does not exist.");
+        setState(() {
+          fetchedExercise = null;
+        });
+        return;
+      }
+
+      int age = userDoc['Age'];
+      String collectionName;
+
+      if (age >= 15 && age <= 24) {
+        collectionName = '(15-24)';
+        ageRangeLabel = "Young Adults (15-24)";
+      } else if (age >= 25 && age <= 39) {
+        collectionName = '(25-39)';
+        ageRangeLabel = "Adults (25-39)";
+      } else {
+        collectionName = '(40+)';
+        ageRangeLabel = "Seniors (40+)";
+      }
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .where('package', isEqualTo: selectedPackage)
+          .get();
+
+      if (!mounted) return;
+
+      setState(() {
+        fetchedExercise =
+            snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      });
+    } catch (e) {
+      print("Error fetching information: $e");
+      setState(() {
+        fetchedExercise = null;
+      });
+    }
+  }
+
+  Future<void> storeSelectedExercise(String title) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('selectedExercise')
+          .doc('info')
+          .set({'selectedexercise': title});
+      print('Selected exercise stored successfully');
+    } catch (e) {
+      print('Error storing selected exercise: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text('Exercise Packages'),
+        backgroundColor: Color(0xFFF7E9AE),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            if (!mounted) return;
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => UserDashboard()),
-            );
+            Navigator.pop(context);
           },
         ),
-        title: Text(
-          "Weight Loss Workouts",
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.green,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'Recipe') {
-                print("hello");
-              } else if (value == 'Diet Plan') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ViewDietPlan()),
-                );
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'Recipe',
-                child: Text('Recipe'),
-              ),
-              PopupMenuItem<String>(
-                value: 'Diet Plan',
-                child: Text('Diet Plan'),
-              ),
-            ],
-          ),
-        ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Color.fromARGB(102, 247, 232, 174),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (loggedInUser != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                      "Weight Loss Workout",
+                      'Logged in as: $loggedInUser',
                       style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                  SizedBox(height: 8),
+                if (selectedPackage != null)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
+                    padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                      ageRangeLabel,
+                      'Selected Package: $selectedPackage',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
+                        color: Colors.lightBlueAccent,
                       ),
                     ),
                   ),
-                  if (SelectedExercise != null)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Selected Package: $SelectedExercise",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                if (ageRangeLabel != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'Age Group: $ageRangeLabel',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
                       ),
                     ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: fetchedExercise.length,
-                      itemBuilder: (context, index) {
-                        final package = fetchedExercise[index];
-                        return Card(
-                          margin: EdgeInsets.all(10),
-                          child: InkWell(
-                            onTap: () async {
-                              if (!mounted) return;
-                              setState(() {
-                                SelectedExercise = package["title"];
-                              });
+                  ),
+                SizedBox(height: 8),
+                Expanded(
+                  child: fetchedExercise != null && fetchedExercise!.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: fetchedExercise!.length,
+                          itemBuilder: (context, index) {
+                            final title = fetchedExercise![index]['title'] ?? 'No title';
 
-                              await FirebaseFirestore.instance
-                                  .collection('selectedExercise')
-                                  .doc('info')
-                                  .set({
-                                'selectedexercise': package["title"],
-                              }, SetOptions(merge: true));
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ExerciseDetailsPage(),
+                            return GestureDetector(
+                              onTap: () {
+                                storeSelectedExercise(title);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ExerciseDetailsPage(),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                color: Colors.white70,
+                                elevation: 3,
+                                margin: EdgeInsets.symmetric(vertical: 6),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: ListTile(
-                                title: Text(
-                                  "${index + 1}. ${package['title'] ?? 'No Title'}",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
+                                child: ListTile(
+                                  title: Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            'No exercise data available',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
-                        );
-                      },
+                        ),
+                ),
+                SizedBox(height: 8), // Add some spacing between the cards and buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: Icon(FontAwesomeIcons.bookOpen),
+                        label: Text('Recipe Name'),
+                        onPressed: () {
+                          print('Recipe Name pressed');
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: Icon(FontAwesomeIcons.utensils),
+                        label: Text('Diet Plan'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => ViewDietPlan()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,

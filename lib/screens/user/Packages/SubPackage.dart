@@ -19,12 +19,15 @@ class _SubPackageState extends State<SubPackage> {
   int _selectedIndex = 2;
   double totalCost = 0.0;
   List<Map<String, dynamic>> dropDownPackages = [];
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
     fetchPackages();
   }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -58,14 +61,16 @@ class _SubPackageState extends State<SubPackage> {
     }
   }
 
-
-
-  void fetchPackages() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('packages').get();
-    final data = snapshot.docs.map((doc) => doc.data()).toList();
-
+  Future<void> fetchPackages() async {
     setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('packages').get();
+      final data = snapshot.docs.map((doc) => doc.data()).toList();
+
       dropDownPackages = data.map((package) {
         String priceString = package["price"].toString();
         RegExp regex = RegExp(r'Discounted:\s*₹(\d+)');
@@ -85,8 +90,16 @@ class _SubPackageState extends State<SubPackage> {
       if (dropDownPackages.isNotEmpty) {
         selectedPackage = dropDownPackages[0]["title"];
         totalCost = dropDownPackages[0]["price"];
+      } else {
+        errorMessage = "No packages available.";
       }
-    });
+    } catch (e) {
+      errorMessage = "Failed to load packages: $e";
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void updatePrice(String? newValue) {
@@ -105,7 +118,7 @@ class _SubPackageState extends State<SubPackage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(
               context,
@@ -119,151 +132,155 @@ class _SubPackageState extends State<SubPackage> {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          dropDownPackages.isEmpty
+          isLoading
               ? const Center(child: CircularProgressIndicator())
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.green, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                        child: const Text(
-                          "Select Package:",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      const SizedBox(height: 50),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.green, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: DropdownButton<String>(
-                            value: selectedPackage,
-                            isExpanded: true,
-                            underline: SizedBox(),
-                            onChanged: updatePrice,
-                            items: dropDownPackages.map((package) {
-                              return DropdownMenuItem<String>(
-                                value: package["title"],
-                                child: Text(package["title"]),
-                              );
-                            }).toList(),
+              : errorMessage != null
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Text(
+                          errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
-                      const SizedBox(height: 50),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.green, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.white.withOpacity(0.8),
-                        ),
+                    )
+                  : SingleChildScrollView(
+                      child: Center(
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              "Total Cost: ₹${totalCost.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
                             const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (selectedPackage != null) {
-                                  try {
-                                    // Fetch user info
-                                    DocumentSnapshot userInfoSnapshot =
-                                        await FirebaseFirestore.instance
-                                            .collection('selectedUser')
-                                            .doc('Information')
-                                            .get();
-
-                                    final userInfo = userInfoSnapshot.data()
-                                        as Map<String, dynamic>?;
-
-                                    String userEmail =
-                                        userInfo?['EmailAddress'] ?? 'N/A';
-                                    dynamic userAge =
-                                        userInfo?['Age'] ?? 'N/A';
-
-                                    // Save package info under package title as doc ID
-                                    await FirebaseFirestore.instance
-                                        .collection('selectedpackage')
-                                        .doc(selectedPackage)
-                                        .set({
-                                      'packageName': selectedPackage,
-                                      'packagePrice': totalCost,
-                                      'timestamp':
-                                          FieldValue.serverTimestamp(),
-                                      'EmailAddress': userEmail,
-                                      'Age': userAge,
-                                    }, SetOptions(merge: true));
-
-                                    // Navigate to confirmation
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            Confirmationpayment(
-                                          packageName: selectedPackage!,
-                                          packagePrice: totalCost,
-                                        ),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            "Error saving package: $e"),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 40, vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              margin: const EdgeInsets.symmetric(horizontal: 30),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.green, width: 2),
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white.withOpacity(0.8),
                               ),
                               child: const Text(
-                                "Proceed to Payment",
-                                style: TextStyle(fontSize: 16),
+                                "Select Package:",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(height: 50),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 5),
+                              margin: const EdgeInsets.symmetric(horizontal: 30),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.green, width: 2),
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: DropdownButton<String>(
+                                  value: selectedPackage,
+                                  isExpanded: true,
+                                  underline: const SizedBox(),
+                                  onChanged: updatePrice,
+                                  items: dropDownPackages.map((package) {
+                                    return DropdownMenuItem<String>(
+                                      value: package["title"],
+                                      child: Text(package["title"]),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 50),
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              margin: const EdgeInsets.symmetric(horizontal: 30),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.green, width: 2),
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Total Cost: ₹${totalCost.toStringAsFixed(2)}",
+                                    style: const TextStyle(
+                                        fontSize: 20, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      if (selectedPackage != null) {
+                                        try {
+                                          DocumentSnapshot userInfoSnapshot =
+                                              await FirebaseFirestore.instance
+                                                  .collection('selectedUser')
+                                                  .doc('Information')
+                                                  .get();
+
+                                          final userInfo = userInfoSnapshot.data()
+                                              as Map<String, dynamic>?;
+
+                                          String userEmail =
+                                              userInfo?['EmailAddress'] ?? 'N/A';
+                                          dynamic userAge = userInfo?['Age'] ?? 'N/A';
+
+                                          final timestamp = DateTime.now();
+
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ConfirmationPayment(
+                                                packageName: selectedPackage!,
+                                                packagePrice: totalCost,
+                                                age: userAge,
+                                                timestamp: timestamp,
+                                                EmailAddress: userEmail,
+                                              ),
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Error fetching user info: $e"),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 40, vertical: 15),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "Proceed to Payment",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -291,7 +308,6 @@ class _SubPackageState extends State<SubPackage> {
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
         backgroundColor: Color(0xFFF7E9AE),
-
       ),
     );
   }

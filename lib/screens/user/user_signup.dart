@@ -85,6 +85,15 @@ class _UserSignupState extends State<UserSignup> {
       );
 
       if (user != null) {
+        // Update selectedUser collection after successful signup
+        await FirebaseFirestore.instance
+            .collection('selectedUser')
+            .doc('Information')
+            .set({
+          'EmailAddress': email,
+          'Age': 18, // default age value; adjust if needed
+        });
+
         Navigator.pushReplacementNamed(context, '/user_dashboard');
       } else {
         _showError("Signup failed. Please try again.");

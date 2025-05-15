@@ -91,6 +91,9 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        title: Text("Diet Plan"),
+        backgroundColor: Color(0xFFF7E9AE),
+
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {

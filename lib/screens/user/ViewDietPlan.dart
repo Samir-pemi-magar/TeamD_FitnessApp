@@ -48,42 +48,54 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
   }
 
   void _fetchUser() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('selectedUser').get();
-    if (snapshot.docs.isNotEmpty) {
-      setState(() {
-        emailAddress = snapshot.docs[0]['EmailAddress'];
-      });
-      _fetchPackage();
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('selectedUser').get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          emailAddress = snapshot.docs[0]['EmailAddress'];
+        });
+        _fetchPackage();
+      }
+    } catch (e) {
+      print('Error fetching user: $e');
     }
   }
 
   void _fetchPackage() async {
     if (emailAddress == null) return;
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('selectedpackage')
-        .where('EmailAddress', isEqualTo: emailAddress)
-        .get();
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('selectedpackage')
+          .where('EmailAddress', isEqualTo: emailAddress)
+          .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      setState(() {
-        selectedPackage = snapshot.docs[0]['packageName'];
-      });
-      _fetchDietPlan();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          selectedPackage = snapshot.docs[0]['packageName'];
+        });
+        _fetchDietPlan();
+      }
+    } catch (e) {
+      print('Error fetching package: $e');
     }
   }
 
   void _fetchDietPlan() async {
     if (emailAddress == null || selectedPackage == null) return;
 
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('MealDataset')
-        .where('EmailAddress', isEqualTo: emailAddress)
-        .where('package', isEqualTo: selectedPackage)
-        .get();
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('MealDataset')
+          .where('EmailAddress', isEqualTo: emailAddress)
+          .where('package', isEqualTo: selectedPackage)
+          .get();
 
-    setState(() {
-      fetchedPackages = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-    });
+      setState(() {
+        fetchedPackages = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      });
+    } catch (e) {
+      print('Error fetching diet plan: $e');
+    }
   }
 
   @override
@@ -91,9 +103,6 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text("Diet Plan"),
-        backgroundColor: Color(0xFFF7E9AE),
-
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -118,7 +127,10 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
             child: CircleAvatar(
               backgroundColor: Colors.white,
               radius: 16,
-              child: Text("ZenFit", style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.green)),
+              child: Text(
+                "ZenFit",
+                style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.green),
+              ),
             ),
           ),
         ],

@@ -25,10 +25,31 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
   }
 
   void _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => TrainerLogin()),
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text("Confirm Logout"),
+            content: Text("Are you sure you want to logout?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context), // Cancel
+                child: Text("No"),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context); // Close dialog
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => TrainerLogin()),
+                    (route) => false,
+                  );
+                },
+                child: Text("Yes"),
+              ),
+            ],
+          ),
     );
   }
 
@@ -88,7 +109,8 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ViewClientsScreen()),
+                        builder: (context) => ViewClientsScreen(),
+                      ),
                     );
                   },
                 ),
@@ -99,7 +121,8 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => TrainerExerciseManager()),
+                        builder: (context) => TrainerExerciseManager(),
+                      ),
                     );
                   },
                 ),
@@ -110,13 +133,13 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => WaterIntakeScreen()),
+                        builder: (context) => WaterIntakeScreen(),
+                      ),
                     );
                   },
                 ),
                 const SizedBox(height: 20),
-                MenuButton(
-                    text: 'Log out', onPressed: () => _logout(context)),
+                MenuButton(text: 'Log out', onPressed: () => _logout(context)),
                 const Spacer(),
               ],
             ),

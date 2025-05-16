@@ -1,4 +1,3 @@
-// Your imports remain unchanged
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessapp/screens/user/Packages/packages.dart';
@@ -22,12 +21,37 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   int _selectedIndex = 3;
 
-  void _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => UserLogin()),
-      (route) => false,
+  void _logout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog first
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserLogin(),
+                  ), // Or your Welcome Page
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -125,7 +149,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           Text(
             '$label: ',
             style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
           ),
           Expanded(
             child: Text(
@@ -151,19 +178,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       final point = data[i];
       double y = point.caloriesBurnt.toDouble();
       barGroups.add(
-        BarChartGroupData(x: i, barRods: [
-          BarChartRodData(
-            toY: y,
-            color: Colors.green,
-            width: 16,
-            borderRadius: BorderRadius.circular(4),
-            backDrawRodData: BackgroundBarChartRodData(
-              show: true,
-              toY: y + 10,
-              color: Colors.green.withOpacity(0.1),
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: y,
+              color: Colors.green,
+              width: 16,
+              borderRadius: BorderRadius.circular(4),
+              backDrawRodData: BackgroundBarChartRodData(
+                show: true,
+                toY: y + 10,
+                color: Colors.green.withOpacity(0.1),
+              ),
             ),
-          )
-        ]),
+          ],
+        ),
       );
     }
 
@@ -182,8 +212,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               sideTitles: SideTitles(
                 showTitles: true,
                 interval: 10,
-                getTitlesWidget: (value, _) => Text(value.toInt().toString(),
-                    style: TextStyle(fontSize: 10)),
+                getTitlesWidget:
+                    (value, _) => Text(
+                      value.toInt().toString(),
+                      style: TextStyle(fontSize: 10),
+                    ),
               ),
             ),
             bottomTitles: AxisTitles(
@@ -194,8 +227,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   final date = data[value.toInt()].timeStamp;
                   return SideTitleWidget(
                     axisSide: meta.axisSide,
-                    child: Text("${date.month}/${date.day}",
-                        style: TextStyle(fontSize: 10)),
+                    child: Text(
+                      "${date.month}/${date.day}",
+                      style: TextStyle(fontSize: 10),
+                    ),
                   );
                 },
               ),
@@ -221,17 +256,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final userEmail = user.email;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: userEmail)
-          .limit(1)
-          .snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('users')
+              .where('email', isEqualTo: userEmail)
+              .limit(1)
+              .snapshots(),
       builder: (context, snapshot) {
         final bool noData = !snapshot.hasData || snapshot.data!.docs.isEmpty;
 
-        final userData = noData
-            ? {}
-            : snapshot.data!.docs.first.data();
+        final userData = noData ? {} : snapshot.data!.docs.first.data();
         final imagePath = userData['imagePath'] as String?;
 
         return Scaffold(
@@ -239,10 +273,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           appBar: AppBar(
             backgroundColor: Color(0xFFF7E9AE),
             elevation: 0,
-            title: Text(
-              'User Profile',
-              style: TextStyle(color: Colors.black),
-            ),
+            title: Text('User Profile', style: TextStyle(color: Colors.black)),
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios, color: Colors.black),
               onPressed: () => Navigator.pop(context),
@@ -251,7 +282,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               IconButton(
                 icon: Icon(Icons.more_vert, color: Colors.black),
                 onPressed: () => _showSettingsMenu(context),
-              )
+              ),
             ],
           ),
           body: Container(
@@ -271,11 +302,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.grey[300],
-                      backgroundImage: imagePath != null
-                          ? (imagePath.startsWith('http')
-                              ? NetworkImage(imagePath)
-                              : AssetImage(imagePath) as ImageProvider)
-                          : AssetImage('assets/images/avatar.png'),
+                      backgroundImage:
+                          imagePath != null
+                              ? (imagePath.startsWith('http')
+                                  ? NetworkImage(imagePath)
+                                  : AssetImage(imagePath) as ImageProvider)
+                              : AssetImage('assets/images/avatar.png'),
                     ),
                     SizedBox(height: 10),
                     Text(
@@ -297,7 +329,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         padding: const EdgeInsets.only(top: 12.0),
                         child: Text(
                           "You haven't updated your profile yet.",
-                          style: TextStyle(color: const Color.fromARGB(179, 0, 0, 0)),
+                          style: TextStyle(
+                            color: const Color.fromARGB(179, 0, 0, 0),
+                          ),
                         ),
                       ),
                     SizedBox(height: 20),
@@ -310,39 +344,59 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                       child: Column(
                         children: [
-                          _buildInfoRow('Age', userData['age']?.toString() ?? 'N/A'),
-                          _buildInfoRow('Height', userData['height']?.toString() ?? 'N/A'),
-                          _buildInfoRow('Selected Package', userData['package'] ?? 'N/A'),
+                          _buildInfoRow(
+                            'Age',
+                            userData['age']?.toString() ?? 'N/A',
+                          ),
+                          _buildInfoRow(
+                            'Height',
+                            userData['height']?.toString() ?? 'N/A',
+                          ),
+                          _buildInfoRow(
+                            'Selected Package',
+                            userData['package'] ?? 'N/A',
+                          ),
                         ],
                       ),
                     ),
                     SizedBox(height: 10),
                     StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: FirebaseFirestore.instance
-                          .collection('FitnessTracking')
-                          .where('EmailAddress', isEqualTo: userEmail)
-                          .snapshots(),
+                      stream:
+                          FirebaseFirestore.instance
+                              .collection('FitnessTracking')
+                              .where('EmailAddress', isEqualTo: userEmail)
+                              .snapshots(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Center(child: CircularProgressIndicator());
                         }
                         if (snapshot.hasError) {
-                          return Center(child: Text("Error: ${snapshot.error}"));
+                          return Center(
+                            child: Text("Error: ${snapshot.error}"),
+                          );
                         }
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return Center(child: Text("No fitness tracking data found."));
+                          return Center(
+                            child: Text("No fitness tracking data found."),
+                          );
                         }
 
-                        final fitnessData = snapshot.data!.docs.map((doc) {
-                          final map = doc.data();
-                          return FitnessTrackingData(
-                            caloriesBurnt: map['CaloriesBurnt'] ?? 0,
-                            timeStamp: (map['TimeStamp'] as Timestamp).toDate(),
-                          );
-                        }).toList();
+                        final fitnessData =
+                            snapshot.data!.docs.map((doc) {
+                              final map = doc.data();
+                              return FitnessTrackingData(
+                                caloriesBurnt: map['CaloriesBurnt'] ?? 0,
+                                timeStamp:
+                                    (map['TimeStamp'] as Timestamp).toDate(),
+                              );
+                            }).toList();
 
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

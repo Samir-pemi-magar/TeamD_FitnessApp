@@ -40,7 +40,7 @@ class _LeaveFeedbackScreenState extends State<LeaveFeedbackScreen> {
         'userId': user.uid,
         'feedback': feedback,
         'timestamp': FieldValue.serverTimestamp(),
-        'trainerReply': null, // allows trainer to reply later
+        'trainerReply': null, 
       });
 
       setState(() {

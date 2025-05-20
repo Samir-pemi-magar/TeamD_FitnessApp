@@ -43,10 +43,11 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Future<void> _readEmailAddress() async {
     try {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('selectedUser')
-          .doc('Information')
-          .get();
+      DocumentSnapshot doc =
+          await FirebaseFirestore.instance
+              .collection('selectedUser')
+              .doc('Information')
+              .get();
 
       if (doc.exists) {
         setState(() {
@@ -92,18 +93,22 @@ class _UserDashboardState extends State<UserDashboard> {
     }
 
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('FitnessTracking')
-          .where('EmailAddress', isEqualTo: emailAddress)
-          .get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance
+              .collection('FitnessTracking')
+              .where('EmailAddress', isEqualTo: emailAddress)
+              .get();
 
       double totalCalories = snapshot.docs.fold(
-          0.0,
-          (sum, doc) =>
-              sum + (doc.data() as Map<String, dynamic>)['CaloriesBurnt']);
+        0.0,
+        (sum, doc) =>
+            sum + (doc.data() as Map<String, dynamic>)['CaloriesBurnt'],
+      );
 
       setState(() {
-        calories = [{'Calories': totalCalories}];
+        calories = [
+          {'Calories': totalCalories},
+        ];
       });
     } catch (e) {
       print("Error fetching calories data: $e");
@@ -209,7 +214,10 @@ class _UserDashboardState extends State<UserDashboard> {
                                 Text("Calories Burnt:"),
                                 Text(
                                   calories.isNotEmpty
-                                      ? (calories.first['Calories']?.toString() ?? "0") + " cal"
+                                      ? (calories.first['Calories']
+                                                  ?.toString() ??
+                                              "0") +
+                                          " cal"
                                       : "Loading... cal",
                                   style: TextStyle(fontSize: 16),
                                 ),
@@ -262,25 +270,34 @@ class _UserDashboardState extends State<UserDashboard> {
                           ),
                           SizedBox(height: 30),
                           ElevatedButton(
-                            onPressed: emailAddress == null
-                                ? null
-                                : () {
-                                    if (_controller.text.trim().isEmpty) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Weight field cannot be empty!'),
-                                          duration: Duration(seconds: 2),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    } else {
-                                      setState(() {
-                                        cal = double.tryParse(_controller.text) ?? 0;
-                                        _createWeightData();
-                                        _controller.clear();
-                                      });
-                                    }
-                                  },
+                            onPressed:
+                                emailAddress == null
+                                    ? null
+                                    : () {
+                                      if (_controller.text.trim().isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Weight field cannot be empty!',
+                                            ),
+                                            duration: Duration(seconds: 2),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      } else {
+                                        setState(() {
+                                          cal =
+                                              double.tryParse(
+                                                _controller.text,
+                                              ) ??
+                                              0;
+                                          _createWeightData();
+                                          _controller.clear();
+                                        });
+                                      }
+                                    },
                             child: Text('Save Weight'),
                           ),
                         ],
@@ -293,8 +310,12 @@ class _UserDashboardState extends State<UserDashboard> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => WaterIntake()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WaterIntake(),
+                            ),
+                          );
                         },
                         child: Container(
                           width: 90,
@@ -314,8 +335,12 @@ class _UserDashboardState extends State<UserDashboard> {
                       SizedBox(width: 100),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => ExercisePackage()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ExercisePackage(),
+                            ),
+                          );
                         },
                         child: Container(
                           width: 90,
@@ -340,8 +365,12 @@ class _UserDashboardState extends State<UserDashboard> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => WeightRecordView()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WeightRecordView(),
+                            ),
+                          );
                         },
                         child: Container(
                           width: 90,

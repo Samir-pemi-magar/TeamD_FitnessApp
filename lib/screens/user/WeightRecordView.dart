@@ -27,36 +27,36 @@ class _WeightRecordViewState extends State<WeightRecordView> {
 
   Future<void> fetchWeightData() async {
     try {
-      // Fetch the selected user's email address
-      final selectedUserDoc = await FirebaseFirestore.instance
-          .collection('selectedUser')
-          .doc('Information')
-          .get();
+      final selectedUserDoc =
+          await FirebaseFirestore.instance
+              .collection('selectedUser')
+              .doc('Information')
+              .get();
 
       final String selectedUserEmail = selectedUserDoc['EmailAddress'];
 
-      // Fetch weight data for the specific email address without using 'orderBy'
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('WeightDataset')
-          .where('EmailAddress', isEqualTo: selectedUserEmail)
-          .get();
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('WeightDataset')
+              .where('EmailAddress', isEqualTo: selectedUserEmail)
+              .get();
       setState(() {
-        weightData = querySnapshot.docs
-            .map((doc) {
-              return {
-                'weight': doc['Weight'] ?? 0,
-                'timestamp':
-                    (doc['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
-              };
-            })
-            .toList()
-            ..sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
+        weightData =
+            querySnapshot.docs.map((doc) {
+                return {
+                  'weight': doc['Weight'] ?? 0,
+                  'timestamp':
+                      (doc['timestamp'] as Timestamp?)?.toDate() ??
+                      DateTime.now(),
+                };
+              }).toList()
+              ..sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
       });
     } catch (e) {
       print('Error fetching weight data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching weight data: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error fetching weight data: $e')));
     }
   }
 
@@ -135,174 +135,175 @@ class _WeightRecordViewState extends State<WeightRecordView> {
           weightData.isEmpty
               ? Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Weight Progress',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                          child: Text(
-                            'Weight Progress',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(143, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color.fromARGB(101, 0, 0, 0),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: SizedBox(
+                          height: 300,
+                          child: LineChart(
+                            LineChartData(
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: getWeightSpots(),
+                                  isCurved: true,
+                                  barWidth: 3,
+                                  color: Colors.blue,
+                                  belowBarData: BarAreaData(show: false),
+                                  dotData: FlDotData(show: true),
+                                ),
+                              ],
+                              titlesData: FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    interval: 1,
+                                    getTitlesWidget: (value, _) {
+                                      int index = value.toInt();
+                                      if (index >= 0 &&
+                                          index < getDateLabels().length) {
+                                        return Text(
+                                          getDateLabels()[index],
+                                          style: TextStyle(fontSize: 10),
+                                        );
+                                      }
+                                      return Text('');
+                                    },
+                                  ),
+                                ),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                topTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget: (value, _) => Text(''),
+                                  ),
+                                ),
+                                rightTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget:
+                                        (value, _) => Text(
+                                          value.toStringAsFixed(0),
+                                          style: TextStyle(fontSize: 10),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              gridData: FlGridData(show: true),
+                              borderData: FlBorderData(
+                                show: true,
+                                border: Border(
+                                  top: BorderSide(color: Colors.black),
+                                  right: BorderSide(color: Colors.black),
+                                  bottom: BorderSide(color: Colors.black),
+                                  left: BorderSide(
+                                    color: Colors.transparent,
+                                  ), // hidden
+                                ),
+                              ),
+                              minX: 0,
+                              maxX: weightData.length.toDouble() - 1,
+                              minY: 0,
+                              maxY: 150,
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
-                        Container(
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(143, 255, 255, 255),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(101, 0, 0, 0),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: SizedBox(
-                            height: 300,
-                            child: LineChart(
-                              LineChartData(
-                                lineBarsData: [
-                                  LineChartBarData(
-                                    spots: getWeightSpots(),
-                                    isCurved: true,
-                                    barWidth: 3,
-                                    color: Colors.blue,
-                                    belowBarData: BarAreaData(show: false),
-                                    dotData: FlDotData(show: true),
-                                  ),
-                                ],
-                                titlesData: FlTitlesData(
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      interval: 1,
-                                      getTitlesWidget: (value, _) {
-                                        int index = value.toInt();
-                                        if (index >= 0 &&
-                                            index < getDateLabels().length) {
-                                          return Text(
-                                            getDateLabels()[index],
-                                            style: TextStyle(fontSize: 10),
-                                          );
-                                        }
-                                        return Text('');
-                                      },
-                                    ),
-                                  ),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: false,
-                                    ),
-                                  ),
-                                  topTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      getTitlesWidget: (value, _) => Text(''),
-                                    ),
-                                  ),
-                                  rightTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      getTitlesWidget: (value, _) => Text(
-                                        value.toStringAsFixed(0),
-                                        style: TextStyle(fontSize: 10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                gridData: FlGridData(show: true),
-                                borderData: FlBorderData(
-                                  show: true,
-                                  border: Border(
-                                    top: BorderSide(color: Colors.black),
-                                    right: BorderSide(color: Colors.black),
-                                    bottom: BorderSide(color: Colors.black),
-                                    left: BorderSide(
-                                        color: Colors.transparent), // hidden
-                                  ),
-                                ),
-                                minX: 0,
-                                maxX: weightData.length.toDouble() - 1,
-                                minY: 0,
-                                maxY: 150,
-                              ),
+                      ),
+                      SizedBox(height: 30),
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(164, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color.fromARGB(73, 0, 0, 0),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
                             ),
+                          ],
+                        ),
+                        child: Text(
+                          'History',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 30),
-                        Container(
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(164, 255, 255, 255),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(73, 0, 0, 0),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            'History',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      ),
+                      SizedBox(height: 10),
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
                             ),
-                          ),
+                          ],
                         ),
-                        SizedBox(height: 10),
-                        Container(
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: weightData.length,
+                          itemBuilder: (context, index) {
+                            final item = weightData[index];
+                            return ListTile(
+                              leading: Icon(Icons.monitor_weight),
+                              title: Text('Weight: ${item['weight']} kg'),
+                              subtitle: Text(
+                                DateFormat(
+                                  'yyyy-MM-dd – kk:mm',
+                                ).format(item['timestamp']),
                               ),
-                            ],
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: weightData.length,
-                            itemBuilder: (context, index) {
-                              final item = weightData[index];
-                              return ListTile(
-                                leading: Icon(Icons.monitor_weight),
-                                title: Text('Weight: ${item['weight']} kg'),
-                                subtitle: Text(
-                                  DateFormat('yyyy-MM-dd – kk:mm')
-                                      .format(item['timestamp']),
-                                ),
-                              );
-                            },
-                          ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

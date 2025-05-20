@@ -31,12 +31,13 @@ class _TrainerForgotPasswordScreenState
     }
 
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('phoneNumber', isEqualTo: phone)
-          .where('role', isEqualTo: 'trainer')
-          .limit(1)
-          .get();
+      final snapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .where('phoneNumber', isEqualTo: phone)
+              .where('role', isEqualTo: 'trainer')
+              .limit(1)
+              .get();
 
       if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,9 +53,9 @@ class _TrainerForgotPasswordScreenState
         _trainerDocId = userDoc.id;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -70,9 +71,9 @@ class _TrainerForgotPasswordScreenState
     }
 
     if (newPwd != confirmPwd) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match.')));
       return;
     }
 
@@ -119,9 +120,9 @@ class _TrainerForgotPasswordScreenState
         MaterialPageRoute(builder: (_) => const TrainerDashboard()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reset Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Reset Error: $e')));
     }
   }
 
@@ -152,7 +153,10 @@ class _TrainerForgotPasswordScreenState
                     const SizedBox(height: 10),
                     const Text(
                       'Verify it\'s you',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -162,7 +166,8 @@ class _TrainerForgotPasswordScreenState
                       decoration: InputDecoration(
                         hintText: 'Enter phone number',
                         filled: true,
-                        fillColor: _phoneVerified ? Colors.grey[300] : Colors.white,
+                        fillColor:
+                            _phoneVerified ? Colors.grey[300] : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -175,7 +180,10 @@ class _TrainerForgotPasswordScreenState
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                         ),
-                        child: const Text('Verify', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'Verify',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       )
                     else ...[
                       TextField(
@@ -213,7 +221,10 @@ class _TrainerForgotPasswordScreenState
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text('Reset & Login', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'Reset & Login',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ],

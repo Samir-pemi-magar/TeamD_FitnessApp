@@ -117,6 +117,7 @@ class _TrainerExerciseEditorState extends State<TrainerExerciseEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFFF7E9AE),
         title: const Text('Trainer Exercise Editor'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),

@@ -20,8 +20,9 @@ class _PackagesState extends State<Packages> {
   @override
   void initState() {
     super.initState();
-    getPackages();  // Call the function to fetch data
+    getPackages(); // Call the function to fetch data
   }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -47,7 +48,7 @@ class _PackagesState extends State<Packages> {
         );
         break;
       case 3:
-      Navigator.pushReplacement(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserProfileScreen()),
         );
@@ -55,12 +56,15 @@ class _PackagesState extends State<Packages> {
     }
   }
 
-
   Future<void> getPackages() async {
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('packages').get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('packages').get();
       setState(() {
-        FetchedPackages = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+        FetchedPackages =
+            snapshot.docs
+                .map((doc) => doc.data() as Map<String, dynamic>)
+                .toList();
       });
     } catch (e) {
       print("error fetching information: $e");
@@ -71,12 +75,15 @@ class _PackagesState extends State<Packages> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFFF7E9AE),
         title: Text("Available Packages"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => UserDashboard()),
+            );
           },
         ),
       ),
@@ -97,7 +104,10 @@ class _PackagesState extends State<Packages> {
                 margin: EdgeInsets.all(10),
                 child: InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => SubPackage()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SubPackage()),
+                    );
                   },
                   child: ListTile(
                     title: Text(
@@ -137,7 +147,6 @@ class _PackagesState extends State<Packages> {
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
         backgroundColor: Color(0xFFF7E9AE),
-
       ),
     );
   }

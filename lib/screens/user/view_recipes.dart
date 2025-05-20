@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RecipesScreen extends StatelessWidget {
   @override
@@ -74,28 +75,40 @@ class RecipesScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 8),
-                      _buildRecipe(
-                        "Oatmeal with banana & almonds",
-                        "Cook ½ cup oats in 1 cup water or milk for 5–7 minutes. Top with 1 sliced banana and 5–6 chopped almonds.",
-                        "~280 kcal | 6g P | 40g C | 10g F",
-                      ),
-                      SizedBox(height: 16),
-                      _buildRecipe(
-                        "Boiled eggs with avocado toast",
-                        "Boil 3 eggs. Toast 1 slice whole grain bread, top with ½ mashed avocado. Season lightly.",
-                        "~350 kcal | 20g P | 15g C | 25g F",
-                      ),
-                      SizedBox(height: 16),
-                      _buildRecipe(
-                        "Chia oats with banana & almonds",
-                        "Soak 1 tbsp chia seeds and ¼ cup oats in ½ cup milk overnight. Top with banana slices and chopped almonds.",
-                        "~300 kcal | 8g P | 35g C | 12g F",
-                      ),
-                      SizedBox(height: 16),
-                      _buildRecipe(
-                        "Chia pudding with berries & boiled egg",
-                        "Mix 1 tbsp chia seeds with ½ cup almond milk. Chill overnight. Add berries and serve with 1 boiled egg.",
-                        "~320 kcal | 15g P | 30g C | 15g F",
+                      StreamBuilder<QuerySnapshot>(
+                        stream:
+                            FirebaseFirestore.instance
+                                .collection('trainer_recipes')
+                                .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return Text("No recipes found.");
+                          }
+
+                          return Column(
+                            children:
+                                snapshot.data!.docs.map((doc) {
+                                  final data =
+                                      doc.data() as Map<String, dynamic>;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 16.0,
+                                    ),
+                                    child: _buildRecipe(
+                                      data['title'] ?? '',
+                                      data['instructions'] ?? '',
+                                      data['nutrition'] ?? '',
+                                    ),
+                                  );
+                                }).toList(),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -119,7 +132,10 @@ class RecipesScreen extends StatelessWidget {
         SizedBox(height: 4),
         Text(instructions, style: TextStyle(fontSize: 14)),
         SizedBox(height: 4),
-        Text(nutrition, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+        Text(
+          nutrition,
+          style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+        ),
       ],
     );
   }

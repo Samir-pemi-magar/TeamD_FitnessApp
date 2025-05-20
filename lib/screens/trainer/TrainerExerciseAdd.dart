@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/screens/trainer/DietPlan.dart';
+import 'package:fitnessapp/screens/trainer/TrainerRecipe.dart';
 import 'package:fitnessapp/screens/trainer/editexercise.dart';
 import 'package:fitnessapp/screens/trainer/trainer_dashboard.dart';
+import 'package:fitnessapp/screens/user/view_recipes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -83,7 +85,7 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFFF7E9AE),
         title: Text("Exercise Manager: Add"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -96,25 +98,29 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
             onSelected: (value) {
               if (value == 'edit') {
                 Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TrainerExerciseEditor()),
-            );
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TrainerExerciseEditor(),
+                  ),
+                );
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("Edit clicked")));
               } else if (value == 'diet') {
                 Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => WeightAndMealTracker()),
-            );
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WeightAndMealTracker(),
+                  ),
+                );
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("Diet Plan clicked")));
               } else if (value == 'recipe') {
-                print("not made yet");
-                ScaffoldMessenger.of(
+                Navigator.push(
                   context,
-                ).showSnackBar(SnackBar(content: Text("Recipe clicked")));
+                  MaterialPageRoute(builder: (context) => TrainerRecipieEdit()),
+                );
               }
             },
             itemBuilder:
@@ -284,7 +290,6 @@ class _TrainerExerciseManagerState extends State<TrainerExerciseManager> {
           ),
         ),
       ),
-      
     );
   }
 }

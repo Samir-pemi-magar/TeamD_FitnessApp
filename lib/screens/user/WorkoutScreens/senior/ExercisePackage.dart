@@ -6,6 +6,7 @@ import 'package:fitnessapp/screens/user/WaterIntake/WaterIntake.dart';
 import 'package:fitnessapp/screens/user/WorkoutScreens/senior/ExerciseDetails.dart';
 import 'package:fitnessapp/screens/user/user_dashboard.dart';
 import 'package:fitnessapp/screens/user/user_profile_screen.dart';
+import 'package:fitnessapp/screens/user/view_recipes.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -36,11 +37,12 @@ class _ExercisePackageState extends State<ExercisePackage> {
 
     try {
       print(loggedInUser);
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('selectedpackage')
-          .where('EmailAddress', isEqualTo: loggedInUser)
-          .limit(1)
-          .get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance
+              .collection('selectedpackage')
+              .where('EmailAddress', isEqualTo: loggedInUser)
+              .limit(1)
+              .get();
 
       if (snapshot.docs.isNotEmpty) {
         setState(() {
@@ -99,10 +101,11 @@ class _ExercisePackageState extends State<ExercisePackage> {
     if (selectedPackage == null || loggedInUser == null) return;
 
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('selectedUser')
-          .doc('Information')
-          .get();
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance
+              .collection('selectedUser')
+              .doc('Information')
+              .get();
 
       if (!userDoc.exists) {
         print("User document does not exist.");
@@ -126,16 +129,19 @@ class _ExercisePackageState extends State<ExercisePackage> {
         ageRangeLabel = "Seniors (40+)";
       }
 
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection(collectionName)
-          .where('package', isEqualTo: selectedPackage)
-          .get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance
+              .collection(collectionName)
+              .where('package', isEqualTo: selectedPackage)
+              .get();
 
       if (!mounted) return;
 
       setState(() {
         fetchedExercise =
-            snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+            snapshot.docs
+                .map((doc) => doc.data() as Map<String, dynamic>)
+                .toList();
       });
     } catch (e) {
       print("Error fetching information: $e");
@@ -166,7 +172,10 @@ class _ExercisePackageState extends State<ExercisePackage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => UserDashboard()),
+            );
           },
         ),
       ),
@@ -221,59 +230,72 @@ class _ExercisePackageState extends State<ExercisePackage> {
                   ),
                 SizedBox(height: 8),
                 Expanded(
-                  child: fetchedExercise != null && fetchedExercise!.isNotEmpty
-                      ? ListView.builder(
-                          itemCount: fetchedExercise!.length,
-                          itemBuilder: (context, index) {
-                            final title = fetchedExercise![index]['title'] ?? 'No title';
+                  child:
+                      fetchedExercise != null && fetchedExercise!.isNotEmpty
+                          ? ListView.builder(
+                            itemCount: fetchedExercise!.length,
+                            itemBuilder: (context, index) {
+                              final title =
+                                  fetchedExercise![index]['title'] ??
+                                  'No title';
 
-                            return GestureDetector(
-                              onTap: () {
-                                storeSelectedExercise(title);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ExerciseDetailsPage(),
+                              return GestureDetector(
+                                onTap: () {
+                                  storeSelectedExercise(title);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ExerciseDetailsPage(),
+                                    ),
+                                  );
+                                },
+                                child: Card(
+                                  color: Colors.white70,
+                                  elevation: 3,
+                                  margin: EdgeInsets.symmetric(vertical: 6),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                );
-                              },
-                              child: Card(
-                                color: Colors.white70,
-                                elevation: 3,
-                                margin: EdgeInsets.symmetric(vertical: 6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: ListTile(
-                                  title: Text(
-                                    title,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                  child: ListTile(
+                                    title: Text(
+                                      title,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
+                              );
+                            },
+                          )
+                          : Center(
+                            child: Text(
+                              'No exercise data available',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
                               ),
-                            );
-                          },
-                        )
-                      : Center(
-                          child: Text(
-                            'No exercise data available',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
+                            ),
                           ),
-                        ),
                 ),
-                SizedBox(height: 8), // Add some spacing between the cards and buttons
+                SizedBox(
+                  height: 8,
+                ), // Add some spacing between the cards and buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
                         icon: Icon(FontAwesomeIcons.bookOpen),
-                        label: Text('Recipe Name'),
+                        label: Text('Recipes'),
                         onPressed: () {
-                          print('Recipe Name pressed');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecipesScreen(),
+                            ),
+                          );
                         },
                       ),
                     ),

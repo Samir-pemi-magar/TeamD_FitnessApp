@@ -13,7 +13,7 @@ class ViewDietPlan extends StatefulWidget {
 }
 
 class _ViewDietPlanState extends State<ViewDietPlan> {
-  List<Map<String, dynamic>> fetchedPackages = [];
+  Map<String, dynamic>? dietData;
   String? emailAddress;
   String? selectedPackage;
   int _selectedIndex = 0;
@@ -33,27 +33,41 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserDashboard()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
         break;
       case 1:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WaterIntake()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WaterIntake()),
+        );
         break;
       case 2:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Packages()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Packages()),
+        );
         break;
       case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserProfileScreen()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+        );
         break;
     }
   }
 
   void _fetchUser() async {
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('selectedUser').get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('selectedUser').get();
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           emailAddress = snapshot.docs[0]['EmailAddress'];
         });
+        print('Email fetched: $emailAddress');
         _fetchPackage();
       }
     } catch (e) {
@@ -64,15 +78,17 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
   void _fetchPackage() async {
     if (emailAddress == null) return;
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('selectedpackage')
-          .where('EmailAddress', isEqualTo: emailAddress)
-          .get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance
+              .collection('selectedpackage')
+              .where('EmailAddress', isEqualTo: emailAddress)
+              .get();
 
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           selectedPackage = snapshot.docs[0]['packageName'];
         });
+        print('Selected package: $selectedPackage');
         _fetchDietPlan();
       }
     } catch (e) {
@@ -84,15 +100,22 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
     if (emailAddress == null || selectedPackage == null) return;
 
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('MealDataset')
-          .where('EmailAddress', isEqualTo: emailAddress)
-          .where('package', isEqualTo: selectedPackage)
-          .get();
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance
+              .collection('MealDataset')
+              .where('EmailAddress', isEqualTo: emailAddress)
+              .where('package', isEqualTo: selectedPackage)
+              .get();
 
-      setState(() {
-        fetchedPackages = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-      });
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          dietData = snapshot.docs[0].data() as Map<String, dynamic>;
+        });
+      } else {
+        setState(() {
+          dietData = null;
+        });
+      }
     } catch (e) {
       print('Error fetching diet plan: $e');
     }
@@ -110,29 +133,26 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
           },
         ),
         title: Text("Diet Plan", style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFFF7E9AE),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'Recipes') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => RecipesScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RecipesScreen()),
+                );
               }
             },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(value: 'Recipes', child: Text('Recipes')),
-            ],
+            itemBuilder:
+                (BuildContext context) => [
+                  PopupMenuItem<String>(
+                    value: 'Recipes',
+                    child: Text('Recipes'),
+                  ),
+                ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 16,
-              child: Text(
-                "ZenFit",
-                style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.green),
-              ),
-            ),
-          ),
+          // Logo removed
         ],
       ),
       body: Container(
@@ -147,43 +167,53 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
         child: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    "🎯 Goal: Fat loss with balanced, lower-calorie meals",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-                SizedBox(height: 16),
-                _buildMealSection("Breakfast:", [
-                  "Oatmeal with banana & almonds 🍌",
-                  "Herbal tea or black coffee (no sugar) ☕",
-                ]),
-                SizedBox(height: 16),
-                _buildMealSection("Lunch:", [
-                  "Grilled chicken or tofu with quinoa & steamed vegetables 🥗",
-                  "Greek yogurt with flaxseeds 🥄",
-                ]),
-                SizedBox(height: 16),
-                _buildMealSection("Snack:", [
-                  "Handful of almonds & walnuts 🌰",
-                  "Green tea 🍵",
-                ]),
-                SizedBox(height: 16),
-                _buildMealSection("Dinner:", [
-                  "Lentils with whole wheat bread 🍲",
-                  "Sautéed spinach & mushrooms 🍄",
-                ]),
-              ],
-            ),
+            child:
+                dietData == null
+                    ? Center(child: CircularProgressIndicator())
+                    : Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(111, 247, 232, 174),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (dietData?['goal'] != null)
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 12.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "🎯 Goal: ${dietData?['goal'] ?? ''}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          SizedBox(height: 16),
+                          _buildMealSection(
+                            "Breakfast:",
+                            dietData?['breakfast'],
+                          ),
+                          SizedBox(height: 16),
+                          _buildMealSection("Lunch:", dietData?['lunch']),
+                          SizedBox(height: 16),
+                          _buildMealSection("Snack:", dietData?['snack']),
+                          SizedBox(height: 16),
+                          _buildMealSection("Dinner:", dietData?['dinner']),
+                        ],
+                      ),
+                    ),
           ),
         ),
       ),
@@ -192,10 +222,22 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(FontAwesomeIcons.house), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(FontAwesomeIcons.droplet), label: 'Water Intake'),
-          BottomNavigationBarItem(icon: Icon(FontAwesomeIcons.box), label: 'Packages'),
-          BottomNavigationBarItem(icon: Icon(FontAwesomeIcons.user), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.house),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.droplet),
+            label: 'Water Intake',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.box),
+            label: 'Packages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.user),
+            label: 'Profile',
+          ),
         ],
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
@@ -204,24 +246,45 @@ class _ViewDietPlanState extends State<ViewDietPlan> {
     );
   }
 
-  Widget _buildMealSection(String title, List<String> items) {
+  Widget _buildMealSection(String title, dynamic meal) {
+    if (meal == null || meal.toString().isEmpty) {
+      return SizedBox.shrink();
+    }
+    List<String> items;
+    if (meal is List) {
+      items = meal.cast<String>();
+    } else {
+      items = [meal.toString()];
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         SizedBox(height: 8),
-        ...items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(item, style: TextStyle(fontSize: 16, color: Colors.white)),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.black, size: 20),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item,
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
-                ],
-              ),
-            )),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

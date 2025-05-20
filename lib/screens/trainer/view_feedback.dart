@@ -14,14 +14,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   final Map<String, TextEditingController> _replyControllers = {};
 
   void _submitReply(String docId, String reply) async {
-    await FirebaseFirestore.instance
-        .collection('feedback')
-        .doc(docId)
-        .update({'trainerReply': reply});
+    await FirebaseFirestore.instance.collection('feedback').doc(docId).update({
+      'trainerReply': reply,
+    });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Reply submitted')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Reply submitted')));
   }
 
   @override
@@ -29,10 +28,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("User Feedback")),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('feedback')
-            .where('userId', isEqualTo: widget.userId)
-            .snapshots(),
+        stream:
+            FirebaseFirestore.instance
+                .collection('feedback')
+                .where('userId', isEqualTo: widget.userId)
+                .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Error loading feedback.'));
@@ -45,7 +45,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {
-            return const Center(child: Text('No feedback found for this user.'));
+            return const Center(
+              child: Text('No feedback found for this user.'),
+            );
           }
 
           return ListView.builder(
@@ -56,12 +58,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               final docId = doc.id;
               final feedbackText = data['feedback'] ?? 'No message';
               final trainerReply = data['trainerReply'] ?? '';
-              final timestamp = data['timestamp'] != null
-                  ? (data['timestamp'] as Timestamp).toDate()
-                  : null;
+              final timestamp =
+                  data['timestamp'] != null
+                      ? (data['timestamp'] as Timestamp).toDate()
+                      : null;
 
               _replyControllers.putIfAbsent(
-                  docId, () => TextEditingController(text: trainerReply));
+                docId,
+                () => TextEditingController(text: trainerReply),
+              );
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -75,7 +80,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       if (timestamp != null)
                         Text(
                           "Submitted on: ${timestamp.day}/${timestamp.month}/${timestamp.year} at ${timestamp.hour}:${timestamp.minute}",
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       const Divider(height: 20),
                       const Text(
@@ -96,7 +104,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
                           onPressed: () {
-                            final replyText = _replyControllers[docId]!.text.trim();
+                            final replyText =
+                                _replyControllers[docId]!.text.trim();
                             if (replyText.isNotEmpty) {
                               _submitReply(docId, replyText);
                             }

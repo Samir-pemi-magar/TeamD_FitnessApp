@@ -76,28 +76,29 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
     try {
       if (emailAddress == null || emailAddress!.isEmpty) return;
 
-      final weightSnapshot = await FirebaseFirestore.instance
-          .collection('WeightDataset')
-          .where('EmailAddress', isEqualTo: emailAddress)
-          .get();
+      final weightSnapshot =
+          await FirebaseFirestore.instance
+              .collection('WeightDataset')
+              .where('EmailAddress', isEqualTo: emailAddress)
+              .get();
 
-      weightData = weightSnapshot.docs
-          .map((doc) {
-            return {
-              'weight': doc['Weight'] ?? 0,
-              'timestamp':
-                  (doc['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
-            };
-          })
-          .toList()
-        ..sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
+      weightData =
+          weightSnapshot.docs.map((doc) {
+              return {
+                'weight': doc['Weight'] ?? 0,
+                'timestamp':
+                    (doc['timestamp'] as Timestamp?)?.toDate() ??
+                    DateTime.now(),
+              };
+            }).toList()
+            ..sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
 
       setState(() {});
     } catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading data')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading data')));
     }
   }
 
@@ -128,32 +129,32 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
           emailAddress == null
               ? Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        _buildSectionTitle('Weight Progress'),
-                        SizedBox(height: 10),
-                        _buildWeightChart(),
-                        SizedBox(height: 30),
-                        _buildSectionTitle('Enter Meal Goals'),
-                        SizedBox(height: 10),
-                        _buildMealInputCard('Breakfast'),
-                        _buildMealInputCard('Lunch'),
-                        _buildMealInputCard('Snack'),
-                        _buildMealInputCard('Dinner'),
-                        _buildMealInputCard('Package'),
-                        _buildMealInputCard('Age'),
-                        _buildMealInputCard('Goal'),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: saveMealData,
-                          child: Text("Save Meals"),
-                        ),
-                      ],
-                    ),
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      _buildSectionTitle('Weight Progress'),
+                      SizedBox(height: 10),
+                      _buildWeightChart(),
+                      SizedBox(height: 30),
+                      _buildSectionTitle('Enter Meal Goals'),
+                      SizedBox(height: 10),
+                      _buildMealInputCard('Breakfast'),
+                      _buildMealInputCard('Lunch'),
+                      _buildMealInputCard('Snack'),
+                      _buildMealInputCard('Dinner'),
+                      _buildMealInputCard('Package'),
+                      _buildMealInputCard('Age'),
+                      _buildMealInputCard('Goal'),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: saveMealData,
+                        child: Text("Save Meals"),
+                      ),
+                    ],
                   ),
                 ),
+              ),
         ],
       ),
     );
@@ -198,10 +199,10 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: true,
-            getDrawingHorizontalLine: (value) =>
-                FlLine(color: Colors.grey.shade300, strokeWidth: 1),
-            getDrawingVerticalLine: (value) =>
-                FlLine(color: Colors.grey.shade300, strokeWidth: 1),
+            getDrawingHorizontalLine:
+                (value) => FlLine(color: Colors.grey.shade300, strokeWidth: 1),
+            getDrawingVerticalLine:
+                (value) => FlLine(color: Colors.grey.shade300, strokeWidth: 1),
           ),
           lineBarsData: [
             LineChartBarData(
@@ -238,13 +239,14 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
                 showTitles: true,
                 interval: 20,
                 reservedSize: 40,
-                getTitlesWidget: (value, meta) => Padding(
-                  padding: EdgeInsets.only(left: 4),
-                  child: Text(
-                    '${value.toInt()}',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
+                getTitlesWidget:
+                    (value, meta) => Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Text(
+                        '${value.toInt()}',
+                        style: TextStyle(fontSize: 10),
+                      ),
+                    ),
               ),
             ),
           ),
@@ -306,9 +308,9 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
 
   Future<void> saveMealData() async {
     if (emailAddress == null || emailAddress!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Email is required')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Email is required')));
       return;
     }
 
@@ -317,25 +319,25 @@ class _WeightAndMealTrackerState extends State<WeightAndMealTracker> {
           .collection('MealDataset')
           .doc(emailAddress)
           .set({
-        'EmailAddress': emailAddress,
-        'breakfast': mealInput['breakfast'],
-        'lunch': mealInput['lunch'],
-        'snack': mealInput['snack'],
-        'dinner': mealInput['dinner'],
-        'package': mealInput['package'],
-        'age': mealInput['age'],
-        'goal': mealInput['goal'],
-        'timestamp': DateTime.now(),
-      }, SetOptions(merge: true));
+            'EmailAddress': emailAddress,
+            'breakfast': mealInput['breakfast'],
+            'lunch': mealInput['lunch'],
+            'snack': mealInput['snack'],
+            'dinner': mealInput['dinner'],
+            'package': mealInput['package'],
+            'age': mealInput['age'],
+            'goal': mealInput['goal'],
+            'timestamp': DateTime.now(),
+          }, SetOptions(merge: true));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Meal goals saved successfully')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Meal goals saved successfully')));
     } catch (e) {
       print('Error saving meal data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save meal data')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save meal data')));
     }
   }
 }

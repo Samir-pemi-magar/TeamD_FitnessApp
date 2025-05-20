@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessapp/screens/admin/admin_package.dart';
+import 'package:fitnessapp/screens/common/welcome_screen.dart';
+import 'package:fitnessapp/screens/trainer/PackageScreen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fitnessapp/screens/trainer/TrainerExerciseAdd.dart';
@@ -99,7 +102,12 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                 MenuButton(
                   text: 'Available Package',
                   onPressed: () {
-                    // Navigate to Available Packages screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AvailablePackagesScreen(),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 20),
@@ -116,7 +124,7 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                 ),
                 const SizedBox(height: 20),
                 MenuButton(
-                  text: 'Diet Plan',
+                  text: 'Add Exercise',
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -139,7 +147,17 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
                   },
                 ),
                 const SizedBox(height: 20),
-                MenuButton(text: 'Log out', onPressed: () => _logout(context)),
+                MenuButton(
+                  text: 'Log Out',
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                      (route) => false,
+                    );
+                  },
+                ),
+
                 const Spacer(),
               ],
             ),

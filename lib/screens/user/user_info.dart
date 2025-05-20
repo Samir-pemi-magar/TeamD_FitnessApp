@@ -26,7 +26,6 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 final Map<String, Widget Function()> workoutScreenRoutes = {
-  // Senior
   'senior|Weight Loss Package (1 Month)': () => SeniorWeightLossScreen(),
   'senior|Weight Loss Package (3 Months)': () => ExercisePackage(),
   'senior|Muscle Building Package (1 Month)':
@@ -93,68 +92,16 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         'gender': gender,
       }, SetOptions(merge: true));
 
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .get();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Updated"), duration: Duration(seconds: 1)),
+      );
 
-      final package = snapshot.data()?['package'];
-      final cleanedPackage = package?.toString().trim(); // clean extra spaces
+      await Future.delayed(Duration(seconds: 1));
 
-      print('DEBUG -- age: $age');
-      print('DEBUG -- gender: $gender');
-      print('DEBUG -- height: $height');
-      print('DEBUG -- weight: $weight');
-      print('DEBUG -- selected package: $cleanedPackage');
-
-      String ageGroup;
-      if (age! >= 15 && age! <= 24) {
-        ageGroup = 'teen';
-      } else if (age! >= 25 && age! <= 39) {
-        ageGroup = 'adult';
-      } else {
-        ageGroup = 'senior';
-      }
-
-      print('DEBUG -- age group: $ageGroup');
-      print('DEBUG -- switch key: ${'$ageGroup|$cleanedPackage'}');
-
-      if (package == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Package not found. Please select a package."),
-          ),
-        );
-        return;
-      }
-
-      Widget nextScreen;
-      // String ageGroup;
-
-      if (age! >= 15 && age! <= 24) {
-        ageGroup = 'teen';
-      } else if (age! >= 25 && age! <= 39) {
-        ageGroup = 'adult';
-      } else {
-        ageGroup = 'senior';
-      }
-
-      final routeKey = '$ageGroup|$cleanedPackage';
-      final screenBuilder = workoutScreenRoutes[routeKey];
-      if (screenBuilder != null) {
-        nextScreen = screenBuilder();
-      } else {
-        nextScreen = Scaffold(
-          body: Center(
-            child: Text(
-              "No screen found for:\nAge Group: $ageGroup\nPackage: $cleanedPackage",
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
-      Navigator.push(context, MaterialPageRoute(builder: (_) => nextScreen));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => UserDashboard()),
+      );
     }
   }
 

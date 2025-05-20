@@ -51,9 +51,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Update Password'),
-      ),
+      appBar: AppBar(title: Text('Update Password')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -82,7 +80,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
             if (_errorMessage.isNotEmpty) ...[
               SizedBox(height: 10),
               Text(_errorMessage, style: TextStyle(color: Colors.red)),
-            ]
+            ],
           ],
         ),
       ),

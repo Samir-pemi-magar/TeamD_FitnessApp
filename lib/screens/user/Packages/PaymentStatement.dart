@@ -102,7 +102,10 @@ class _PaymentStatementState extends State<PaymentStatement> {
                     Center(
                       child: Text(
                         "Payment Statement",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -132,7 +135,10 @@ class _PaymentStatementState extends State<PaymentStatement> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 15,
+                          ),
                           textStyle: const TextStyle(fontSize: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -141,7 +147,9 @@ class _PaymentStatementState extends State<PaymentStatement> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (_) => const UserInfoScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const UserInfoScreen(),
+                            ),
                           );
                         },
                         child: const Text("Continue"),
